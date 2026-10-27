@@ -48,6 +48,28 @@ func resourceHotAirBalloon() *schema.Resource {
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			// ref-end: list-vs-set-schema
+			"modification": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "Modifications to the hot air balloon, identified by ID.",
+				Set: func(value any) int {
+					return schema.HashString(value.(map[string]any)["id"])
+				},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The identifier of the modification.",
+						},
+						"description": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The description of the modification.",
+						},
+					},
+				},
+			},
 		},
 	}
 }

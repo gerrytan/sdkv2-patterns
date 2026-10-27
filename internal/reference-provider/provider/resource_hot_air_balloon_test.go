@@ -51,6 +51,25 @@ func TestAccHotAirBalloonExteriorColourDuplicates(t *testing.T) {
 	})
 }
 
+//go:embed resource_hot_air_balloon_test_modification_dup.tf
+var testAccHotAirBalloonModificationDupConfig string
+
+func TestAccHotAirBalloonModificationDuplicates(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		Steps: []resource.TestStep{{
+			Config: testAccHotAirBalloonModificationDupConfig,
+			Check: resource.ComposeTestCheckFunc(
+				resource.TestCheckResourceAttr("hello_hot_air_balloon.test", "modification.#", "1"),
+				resource.TestCheckTypeSetElemNestedAttrs("hello_hot_air_balloon.test", "modification.*", map[string]string{
+					"id":          "satNav",
+					"description": "yet another sat nav modification, mistakenly added",
+				}),
+			),
+		}},
+	})
+}
+
 func TestAccHotAirBalloonAdditionalGasTank(t *testing.T) {
 	for _, test := range []struct {
 		name  string
