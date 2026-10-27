@@ -1,0 +1,13 @@
+[project]
+name = "sdkv2-cli"
+version = "0.1.0"
+description = "Internal CLI for SDK v2 patterns."
+requires-python = ">=3.14,<3.15"
+dependencies = ["pyyaml>=6.0.3"]
+
+[project.scripts]
+sdkv2-cli = "sdkv2_cli:main"
+
+[build-system]
+requires = ["uv_build>=0.11.13,<0.12.0"]
+build-backend = "uv_build"
