@@ -156,7 +156,7 @@ class InstallGitPrecommitTests(unittest.TestCase):
             ("unrelated.txt", None),
             ("README.md", "build-toc"),
             ("validation/deep/example.md", "build-toc"),
-            (".github/workflows/check-toc.yml", "build-toc"),
+            (".github/workflows/check-markdown.yml", "build-toc"),
             ("internal/cli/src/example.py", "unittest"),
             ("internal/cli/uv.lock", "unittest"),
             (".github/workflows/test-cli.yml", "unittest"),

@@ -26,7 +26,7 @@ func resourceHotAirBalloon() *schema.Resource {
 				Required:    true,
 				Description: "The name of the hot air balloon.",
 			},
-			// ref-start: schema
+			// ref-start: validating-multi-fields-schema
 			"sku": {
 				Type:         schema.TypeString,
 				Required:     true,
@@ -39,11 +39,12 @@ func resourceHotAirBalloon() *schema.Resource {
 				Description:  "Additional gas tanks, from 1 to 10. Only available with the premium SKU.",
 				ValidateFunc: validation.IntBetween(1, 10),
 			},
-			// ref-end: schema
+			// ref-end: validating-multi-fields-schema
 		},
 	}
 }
 
+// ref-start: validating-multi-fields-customdiff
 func resourceHotAirBalloonCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ any) error {
 	config := d.GetRawConfig()
 	if config.IsNull() || !config.IsKnown() {
@@ -62,6 +63,8 @@ func resourceHotAirBalloonCustomizeDiff(_ context.Context, d *schema.ResourceDif
 	}
 	return nil
 }
+
+// ref-end: validating-multi-fields-customdiff
 
 func resourceHotAirBalloonCreate(_ context.Context, d *schema.ResourceData, _ any) diag.Diagnostics {
 	d.SetId(d.Get("name").(string))

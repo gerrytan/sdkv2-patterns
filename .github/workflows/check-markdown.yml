@@ -1,0 +1,45 @@
+name: Check Markdown
+
+on:
+  push:
+    paths:
+      - '**/*.md'
+      - 'internal/cli/**'
+      - 'internal/reference-provider/**'
+      - '.github/workflows/check-markdown.yml'
+  pull_request:
+    paths:
+      - '**/*.md'
+      - 'internal/cli/**'
+      - 'internal/reference-provider/**'
+      - '.github/workflows/check-markdown.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  check-markdown:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+      - name: Build table of contents
+        run: |
+          if ! uv run --locked --project internal/cli svp build-toc; then
+            echo '::error::TOC generation failed. Run uv run --locked --project internal/cli svp build-toc from the project root and fix the reported metadata or README marker errors.'
+            exit 1
+          fi
+      - name: Build code ref
+        run: |
+          if ! uv run --locked --project internal/cli svp build-code-ref; then
+            echo '::error::Code reference generation failed. Run uv run --locked --project internal/cli svp build-code-ref from the project root and fix the reported reference paths or ref-start/ref-end markers.'
+            exit 1
+          fi
+      - name: Check for changes
+        run: |
+          if ! git diff --exit-code; then
+            echo '::error::Generated Markdown is out of date. From the project root, run both commands below, review the resulting Markdown changes, then commit and push them.'
+            echo 'uv run --locked --project internal/cli svp build-toc'
+            echo 'uv run --locked --project internal/cli svp build-code-ref'
+            exit 1
+          fi

@@ -8,7 +8,7 @@ HOOK = HOOK_HEADER + """\
 set -eu
 
 cd "$(git rev-parse --show-toplevel)"
-if ! git diff --cached --quiet --no-renames -- ':(glob)**/*.md' '.github/workflows/check-toc.yml'; then
+if ! git diff --cached --quiet --no-renames -- ':(glob)**/*.md' '.github/workflows/check-markdown.yml'; then
     uv run --locked --project internal/cli svp build-toc
     if ! git diff --exit-code -- README.md; then
         cat >&2 <<'EOF'
