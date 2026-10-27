@@ -1,0 +1,23 @@
+name: Test CLI
+
+on:
+  push:
+    paths:
+      - 'internal/cli/**'
+      - '.github/workflows/test-cli.yml'
+  pull_request:
+    paths:
+      - 'internal/cli/**'
+      - '.github/workflows/test-cli.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test-cli:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+      - name: Run unit tests
+        run: uv run --locked --project internal/cli python -m unittest discover -s internal/cli/tests -v
