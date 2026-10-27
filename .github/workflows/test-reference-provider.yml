@@ -1,0 +1,45 @@
+name: Test reference provider
+
+on:
+  push:
+    paths:
+      - 'internal/reference-provider/**'
+      - '.terraform-version'
+      - '.github/workflows/test-reference-provider.yml'
+  pull_request:
+    paths:
+      - 'internal/reference-provider/**'
+      - '.terraform-version'
+      - '.github/workflows/test-reference-provider.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  acceptance-tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        with:
+          go-version-file: internal/reference-provider/go.mod
+          cache-dependency-path: internal/reference-provider/go.sum
+      - name: Check out tfenv
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: tfutils/tfenv
+          ref: de6ce2e809c155cbc5e2cfeb3b1bef151244e045 # v3.2.2
+          path: .tfenv
+          persist-credentials: false
+      - name: Add tfenv to PATH
+        run: echo "$GITHUB_WORKSPACE/.tfenv/bin" >> "$GITHUB_PATH"
+      - name: Install pinned Terraform version
+        working-directory: internal/reference-provider
+        run: |
+          tfenv install
+          tfenv use
+      - name: Run acceptance tests
+        working-directory: internal/reference-provider
+        env:
+          TF_ACC: '1'
+        run: go test ./... -v -count=1
