@@ -1,6 +1,7 @@
 import argparse
 
 from .build_toc import build_toc
+from .install_git_precommit import install_git_precommit
 
 
 def main() -> None:
@@ -8,5 +9,9 @@ def main() -> None:
     commands = parser.add_subparsers(dest="command", required=True)
     build_toc_parser = commands.add_parser("buildToc", help="Build the table of contents.")
     build_toc_parser.set_defaults(handler=build_toc)
+    install_hook_parser = commands.add_parser(
+        "installGitPrecommit", help="Install the repository's pre-commit validation hook."
+    )
+    install_hook_parser.set_defaults(handler=install_git_precommit)
     args = parser.parse_args()
     args.handler()
