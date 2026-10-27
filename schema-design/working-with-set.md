@@ -116,6 +116,6 @@ resource "hello_hot_air_balloon" "test" {
 
 <!-- ref-end -->
 
-[^1] Refer to [`TestAccHotAirBalloonExteriorColourDuplicates`](../internal/reference-provider/provider/resource_hot_air_balloon_test.go)
-[^2] Refer to [`TestAccHotAirBalloonExteriorColourIndexInvalid`](../internal/reference-provider/provider/resource_hot_air_balloon_test.go)
-[^3] Refer to [`TestAccHotAirBalloonModificationDuplicates`](../internal/reference-provider/provider/resource_hot_air_balloon_test.go)
+[^1]: Refer to [`TestAccHotAirBalloonExteriorColourDuplicates`](../internal/reference-provider/provider/resource_hot_air_balloon_test.go)
+[^2]: Refer to [`TestAccHotAirBalloonExteriorColourIndexInvalid`](../internal/reference-provider/provider/resource_hot_air_balloon_test.go)
+[^3]: Refer to [`TestAccHotAirBalloonModificationDuplicates`](../internal/reference-provider/provider/resource_hot_air_balloon_test.go)
