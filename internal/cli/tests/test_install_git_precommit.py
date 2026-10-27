@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from sdkv2_cli.install_git_precommit import HOOK, HOOK_HEADER, install_git_precommit
+from svp.install_git_precommit import HOOK, HOOK_HEADER, install_git_precommit
 
 
 class InstallGitPrecommitTests(unittest.TestCase):
@@ -81,7 +81,7 @@ class InstallGitPrecommitTests(unittest.TestCase):
             '#!/bin/sh\n'
             'printf "%s\\n" "$*" >> "$UV_CALLS"\n'
             'case "$*" in\n'
-            '  *buildToc)\n'
+            '  *build-toc)\n'
             '    if [ "${UPDATE_TOC:-0}" = 1 ]; then\n'
             '        printf "updated TOC\\n" > README.md\n'
             '    fi\n'
@@ -136,7 +136,7 @@ class InstallGitPrecommitTests(unittest.TestCase):
                 commands = calls.read_text(encoding="utf-8").splitlines()
                 self.assertEqual(len(commands), expected_calls)
                 self.assertEqual(
-                    commands[0], "run --locked --project internal/cli sdkv2-cli buildToc"
+                    commands[0], "run --locked --project internal/cli svp build-toc"
                 )
                 if expected_calls == 2:
                     self.assertEqual(
@@ -154,9 +154,9 @@ class InstallGitPrecommitTests(unittest.TestCase):
 
         for filename, expected_command in (
             ("unrelated.txt", None),
-            ("README.md", "buildToc"),
-            ("validation/deep/example.md", "buildToc"),
-            (".github/workflows/check-toc.yml", "buildToc"),
+            ("README.md", "build-toc"),
+            ("validation/deep/example.md", "build-toc"),
+            (".github/workflows/check-toc.yml", "build-toc"),
             ("internal/cli/src/example.py", "unittest"),
             ("internal/cli/uv.lock", "unittest"),
             (".github/workflows/test-cli.yml", "unittest"),
@@ -203,7 +203,7 @@ class InstallGitPrecommitTests(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 1)
         self.assertIn("git add README.md", result.stderr)
-        self.assertIn("uv run --locked --project internal/cli sdkv2-cli buildToc", result.stderr)
+        self.assertIn("uv run --locked --project internal/cli svp build-toc", result.stderr)
         self.assertEqual(readme.read_text(encoding="utf-8"), "updated TOC\n")
 
         self.git("add", "README.md")

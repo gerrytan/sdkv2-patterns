@@ -26,6 +26,7 @@ func resourceHotAirBalloon() *schema.Resource {
 				Required:    true,
 				Description: "The name of the hot air balloon.",
 			},
+			// ref-start: schema
 			"sku": {
 				Type:         schema.TypeString,
 				Required:     true,
@@ -38,6 +39,7 @@ func resourceHotAirBalloon() *schema.Resource {
 				Description:  "Additional gas tanks, from 1 to 10. Only available with the premium SKU.",
 				ValidateFunc: validation.IntBetween(1, 10),
 			},
+			// ref-end: schema
 		},
 	}
 }

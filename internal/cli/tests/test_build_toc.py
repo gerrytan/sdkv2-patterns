@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from sdkv2_cli.build_toc import build_toc
+from svp.build_toc import build_toc
 
 
 class BuildTocTests(unittest.TestCase):

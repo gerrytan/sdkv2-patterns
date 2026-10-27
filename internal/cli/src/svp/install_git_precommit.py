@@ -2,14 +2,14 @@ import subprocess
 from pathlib import Path
 
 
-HOOK_HEADER = "#!/bin/sh\n# Installed by sdkv2-cli installGitPrecommit.\n"
+HOOK_HEADER = "#!/bin/sh\n# Installed by svp install-git-precommit.\n"
 
 HOOK = HOOK_HEADER + """\
 set -eu
 
 cd "$(git rev-parse --show-toplevel)"
 if ! git diff --cached --quiet --no-renames -- ':(glob)**/*.md' '.github/workflows/check-toc.yml'; then
-    uv run --locked --project internal/cli sdkv2-cli buildToc
+    uv run --locked --project internal/cli svp build-toc
     if ! git diff --exit-code -- README.md; then
         cat >&2 <<'EOF'
 Error: README.md differs from the staged table of contents.
@@ -17,7 +17,7 @@ The TOC builder has run. Review README.md, then stage the updated TOC:
     git add README.md
 Retry your commit after staging the update.
 To regenerate the TOC manually:
-    uv run --locked --project internal/cli sdkv2-cli buildToc
+    uv run --locked --project internal/cli svp build-toc
 EOF
         exit 1
     fi
