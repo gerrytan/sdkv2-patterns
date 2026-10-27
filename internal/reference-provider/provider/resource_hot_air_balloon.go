@@ -40,18 +40,19 @@ func resourceHotAirBalloon() *schema.Resource {
 				ValidateFunc: validation.IntBetween(1, 10),
 			},
 			// ref-end: validating-multi-fields-schema
-			// ref-start: list-vs-set-schema
+			// ref-start: working-with-set-schema
 			"exterior_colour": {
 				Type:        schema.TypeSet,
 				Optional:    true,
 				Description: "The exterior colours of the hot air balloon.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
-			// ref-end: list-vs-set-schema
+			// ref-end: working-with-set-schema
+			// ref-start: complex-set-schema
 			"modification": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "Modifications to the hot air balloon, identified by ID.",
+				Description: "Modifications to the hot air balloon, identified by id.",
 				Set: func(value any) int {
 					return schema.HashString(value.(map[string]any)["id"])
 				},
@@ -71,6 +72,7 @@ func resourceHotAirBalloon() *schema.Resource {
 				},
 			},
 		},
+		// ref-end: complex-set-schema
 	}
 }
 

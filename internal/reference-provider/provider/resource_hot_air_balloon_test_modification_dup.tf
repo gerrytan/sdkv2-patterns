@@ -2,7 +2,7 @@ resource "hello_hot_air_balloon" "test" {
   name = "test-balloon"
   sku  = "standard"
 
-  modification {
+  modification { # this element will be overwritten by the one underneath because it has the same id!
     id          = "satNav"
     description = "satellite navigation"
   }

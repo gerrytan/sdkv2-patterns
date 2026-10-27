@@ -6,7 +6,7 @@ Collection of common patterns and best practices when using [Terraform Plugin SD
 
 ## Schema Design
 
-- [List vs set](schema-design/list-vs-set.md)
+- [Working with set](schema-design/working-with-set.md)
 
 ## Validation
 

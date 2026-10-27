@@ -21,6 +21,11 @@ func resourcePaperPlane() *schema.Resource {
 				Required:    true,
 				Description: "The name of the paper plane.",
 			},
+			"exterior_colour": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The exterior colour of the paper plane.",
+			},
 			"sku": {
 				Type:         schema.TypeString,
 				Optional:     true,

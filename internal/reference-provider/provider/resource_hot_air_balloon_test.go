@@ -51,6 +51,20 @@ func TestAccHotAirBalloonExteriorColourDuplicates(t *testing.T) {
 	})
 }
 
+//go:embed resource_hot_air_balloon_test_set_index.tf
+var testAccHotAirBalloonSetIndexConfig string
+
+func TestAccHotAirBalloonExteriorColourIndexInvalid(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		Steps: []resource.TestStep{{
+			Config:      testAccHotAirBalloonSetIndexConfig,
+			PlanOnly:    true,
+			ExpectError: regexp.MustCompile("Elements of a set are identified only by their value"),
+		}},
+	})
+}
+
 //go:embed resource_hot_air_balloon_test_modification_dup.tf
 var testAccHotAirBalloonModificationDupConfig string
 
