@@ -34,4 +34,6 @@ resource "hello_hot_air_balloon" "test" {
 
 <!-- ref-end -->
 
+If the values are replaced with `["blue", "red"]`, the plan diff will be empty because the set already contains these values[^1]. Also observe how the order of the elements is not significant.
+
 [^1] Refer to [`TestAccHotAirBalloonExteriorColourDuplicates`](../internal/reference-provider/provider/resource_hot_air_balloon_test.go)

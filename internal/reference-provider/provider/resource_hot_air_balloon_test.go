@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"fmt"
 	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -30,14 +31,23 @@ var testAccHotAirBalloonSetDupConfig string
 func TestAccHotAirBalloonExteriorColourDuplicates(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
-		Steps: []resource.TestStep{{
-			Config: testAccHotAirBalloonSetDupConfig,
-			Check: resource.ComposeTestCheckFunc(
-				resource.TestCheckResourceAttr("hello_hot_air_balloon.test", "exterior_colour.#", "2"),
-				resource.TestCheckTypeSetElemAttr("hello_hot_air_balloon.test", "exterior_colour.*", "red"),
-				resource.TestCheckTypeSetElemAttr("hello_hot_air_balloon.test", "exterior_colour.*", "blue"),
-			),
-		}},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccHotAirBalloonSetDupConfig,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("hello_hot_air_balloon.test", "exterior_colour.#", "2"),
+					resource.TestCheckTypeSetElemAttr("hello_hot_air_balloon.test", "exterior_colour.*", "red"),
+					resource.TestCheckTypeSetElemAttr("hello_hot_air_balloon.test", "exterior_colour.*", "blue"),
+				),
+			},
+			{
+				Config: strings.ReplaceAll(
+					testAccHotAirBalloonSetDupConfig, `["red", "blue", "red"]`, `["blue", "red"]`,
+				),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: false,
+			},
+		},
 	})
 }
 
