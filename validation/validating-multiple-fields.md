@@ -53,4 +53,9 @@ func resourceHotAirBalloonCustomizeDiff(_ context.Context, d *schema.ResourceDif
 
 <!-- ref-end -->
 
-Observe how `IsKnown` value check is performed, and the validator opts out if the value is unknown. In Terraform some values are not known during plan time and the validation logic cannot be done yet.
+Observe how `IsKnown` value check is performed on each fields, and the validator opts out by returning nil early if the value is unknown. Sometimes values are not known during plan time and the validation logic cannot be done yet until apply time.
+
+In the below example, `hello_hot_air_balloon` will pass validation during plan time, but the `can only be set when sku is premium` validation error will occur during apply time.
+
+<!-- ref-start file="internal/reference-provider/provider/resource_hot_air_balloon_test_value_unknown.tf" lang="terraform" -->
+<!-- ref-end -->

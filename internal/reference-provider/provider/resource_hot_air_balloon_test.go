@@ -1,6 +1,7 @@
 package provider
 
 import (
+	_ "embed"
 	"fmt"
 	"regexp"
 	"testing"
@@ -72,23 +73,22 @@ func TestAccHotAirBalloonAdditionalGasTankInvalid(t *testing.T) {
 	}
 }
 
+//go:embed resource_hot_air_balloon_test_value_unknown.tf
+var testAccHotAirBalloonValueUnknownConfig string
+
 func TestAccHotAirBalloonInvalidAdditionalGasTankAllowedIfValueIsUnknown(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
-		Steps: []resource.TestStep{{
-			Config: `
-resource "terraform_data" "sku" {
-  input = "standard"
-}
-
-resource "hello_hot_air_balloon" "test" {
-  name                = "test-balloon"
-  sku                 = terraform_data.sku.output
-  additional_gas_tank  = 5
-}
-`,
-			PlanOnly:           true,
-			ExpectNonEmptyPlan: true,
-		}},
+		Steps: []resource.TestStep{
+			{
+				Config:             testAccHotAirBalloonValueUnknownConfig,
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+			},
+			{
+				Config:      testAccHotAirBalloonValueUnknownConfig,
+				ExpectError: regexp.MustCompile("additional_gas_tank can only be set when sku is premium"),
+			},
+		},
 	})
 }
