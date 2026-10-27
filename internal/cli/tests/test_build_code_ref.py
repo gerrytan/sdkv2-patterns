@@ -38,6 +38,22 @@ class BuildCodeRefTests(unittest.TestCase):
         build_code_ref(self.root)
         self.assertEqual(self.markdown.read_text(encoding="utf-8"), expected)
 
+    def test_includes_entire_file_and_is_repeatable(self) -> None:
+        self.source.write_text(
+            '    resource "hello_paper_plane" "test" {\n        name = "test"\n    }\n',
+            encoding="utf-8",
+        )
+        start = '<!-- ref-start file="source.go" lang="terraform" -->'
+        self.markdown.write_text(f"{start}\nstale\n<!-- ref-end -->\n", encoding="utf-8")
+        expected = (
+            f'{start}\n\n```terraform\nresource "hello_paper_plane" "test" {{\n'
+            '    name = "test"\n}\n```\n\n<!-- ref-end -->\n'
+        )
+        build_code_ref(self.root)
+        self.assertEqual(self.markdown.read_text(encoding="utf-8"), expected)
+        build_code_ref(self.root)
+        self.assertEqual(self.markdown.read_text(encoding="utf-8"), expected)
+
     def test_supports_space_indentation_and_other_languages(self) -> None:
         self.source.write_text(
             "    # ref-start: schema\n    if True:\n        print('hello')\n"
@@ -62,6 +78,9 @@ class BuildCodeRefTests(unittest.TestCase):
             self.start.replace("#schema", "#missing") + "\n<!-- ref-end -->",
             self.start.replace("source.go", "missing.go") + "\n<!-- ref-end -->",
             self.start.replace(' lang="go"', "") + "\n<!-- ref-end -->",
+            '<!-- ref-start file="missing.tf" lang="terraform" -->\n<!-- ref-end -->',
+            '<!-- ref-start file="../outside.tf" lang="terraform" -->\n<!-- ref-end -->',
+            self.start.replace(' lang="go"', ' file="source.go" lang="go"') + "\n<!-- ref-end -->",
         ):
             with self.subTest(content=content):
                 self.markdown.write_text(content, encoding="utf-8")

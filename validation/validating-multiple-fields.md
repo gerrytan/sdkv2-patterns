@@ -58,4 +58,18 @@ Observe how `IsKnown` value check is performed on each fields, and the validator
 In the below example, `hello_hot_air_balloon` will pass validation during plan time, but the `can only be set when sku is premium` validation error will occur during apply time.
 
 <!-- ref-start file="internal/reference-provider/provider/resource_hot_air_balloon_test_value_unknown.tf" lang="terraform" -->
+
+```hcl
+resource "hello_paper_plane" "test" {
+  name = "test-paper-plane"
+  # Remote API set sku to "standard" if not specified
+}
+
+resource "hello_hot_air_balloon" "test" {
+  name                = "test-balloon"
+  sku                 = hello_paper_plane.test.sku
+  additional_gas_tank = 5
+}
+```
+
 <!-- ref-end -->
