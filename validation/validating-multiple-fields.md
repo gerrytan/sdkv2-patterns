@@ -59,7 +59,7 @@ In the below example, `hello_hot_air_balloon` will pass validation during plan t
 
 <!-- ref-start file="internal/reference-provider/provider/resource_hot_air_balloon_test_value_unknown.tf" lang="terraform" -->
 
-```hcl
+```terraform
 resource "hello_paper_plane" "test" {
   name = "test-paper-plane"
   # Remote API set sku to "standard" if not specified
