@@ -24,6 +24,23 @@ resource "hello_hot_air_balloon" "test" {
 `, sku, tanks)
 }
 
+//go:embed resource_hot_air_balloon_test_set_dup.tf
+var testAccHotAirBalloonSetDupConfig string
+
+func TestAccHotAirBalloonExteriorColourDuplicates(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		Steps: []resource.TestStep{{
+			Config: testAccHotAirBalloonSetDupConfig,
+			Check: resource.ComposeTestCheckFunc(
+				resource.TestCheckResourceAttr("hello_hot_air_balloon.test", "exterior_colour.#", "2"),
+				resource.TestCheckTypeSetElemAttr("hello_hot_air_balloon.test", "exterior_colour.*", "red"),
+				resource.TestCheckTypeSetElemAttr("hello_hot_air_balloon.test", "exterior_colour.*", "blue"),
+			),
+		}},
+	})
+}
+
 func TestAccHotAirBalloonAdditionalGasTank(t *testing.T) {
 	for _, test := range []struct {
 		name  string

@@ -40,6 +40,14 @@ func resourceHotAirBalloon() *schema.Resource {
 				ValidateFunc: validation.IntBetween(1, 10),
 			},
 			// ref-end: validating-multi-fields-schema
+			// ref-start: list-vs-set-schema
+			"exterior_colour": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "The exterior colours of the hot air balloon.",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			// ref-end: list-vs-set-schema
 		},
 	}
 }
