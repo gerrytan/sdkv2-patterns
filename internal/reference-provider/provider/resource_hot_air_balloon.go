@@ -125,6 +125,7 @@ func resourceHotAirBalloonAdditionalGasTankSkuCustomizeDiff(_ context.Context, d
 
 // ref-end: validating-multi-fields-customdiff
 
+// ref-start: validating-dup-customdiff
 func resourceHotAirBalloonModificationV2CustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ any) error {
 	config := d.GetRawConfig()
 	if config.IsNull() || !config.IsKnown() {
@@ -151,6 +152,8 @@ func resourceHotAirBalloonModificationV2CustomizeDiff(_ context.Context, d *sche
 	}
 	return nil
 }
+
+// ref-end: validating-dup-customdiff
 
 func resourceHotAirBalloonCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	name := d.Get("name").(string)

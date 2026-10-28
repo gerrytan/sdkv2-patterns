@@ -115,6 +115,43 @@ resource "hello_hot_air_balloon" "test" {
 
 <!-- ref-end -->
 
+## Plan-time validation for duplicate elements
+
+Implement a plan-time validation logic to guard against invalid config using a `CustomizeDiff` function similar to below:
+
+<!-- ref-start ref="internal/reference-provider/provider/resource_hot_air_balloon.go#validating-dup-customdiff" lang="go" -->
+
+```go
+func resourceHotAirBalloonModificationV2CustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ any) error {
+	config := d.GetRawConfig()
+	if config.IsNull() || !config.IsKnown() {
+		return nil
+	}
+	modifications := config.GetAttr("modification_v2")
+	if modifications.IsNull() || !modifications.IsKnown() {
+		return nil
+	}
+	seen := make(map[string]bool)
+	for iterator := modifications.ElementIterator(); iterator.Next(); {
+		_, modification := iterator.Element()
+		if modification.IsNull() || !modification.IsKnown() {
+			continue
+		}
+		id := modification.GetAttr("id")
+		if id.IsNull() || !id.IsKnown() {
+			continue
+		}
+		if seen[id.AsString()] {
+			return fmt.Errorf("modification_v2 contains duplicate id %q", id.AsString())
+		}
+		seen[id.AsString()] = true
+	}
+	return nil
+}
+```
+
+<!-- ref-end -->
+
 [^1]: Refer to [`TestAccHotAirBalloonExteriorColourDuplicates`](../internal/reference-provider/provider/resource_hot_air_balloon_test.go)
 [^2]: Refer to [`TestAccHotAirBalloonExteriorColourIndexInvalid`](../internal/reference-provider/provider/resource_hot_air_balloon_test.go)
 [^3]: Refer to [`TestAccHotAirBalloonModificationDuplicates`](../internal/reference-provider/provider/resource_hot_air_balloon_test.go)
