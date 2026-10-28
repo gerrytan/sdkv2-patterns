@@ -80,9 +80,13 @@ func resourcePaperPlaneDelete(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func paperPlanePayload(d *schema.ResourceData) map[string]any {
+	sku := d.Get("sku").(string)
+	if sku == "" {
+		sku = "standard"
+	}
 	return map[string]any{
 		"name":            d.Get("name"),
-		"sku":             d.Get("sku"),
+		"sku":             sku,
 		"exterior_colour": d.Get("exterior_colour"),
 	}
 }

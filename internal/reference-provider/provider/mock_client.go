@@ -137,9 +137,6 @@ func (t *mockTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 		if err := json.NewDecoder(req.Body).Decode(&data); err != nil || data == nil {
 			return mockResponse(req, http.StatusBadRequest, map[string]any{"error": "expected a JSON object"})
 		}
-		if resourceType == "hello_paper_plane" && (data["sku"] == nil || data["sku"] == "") {
-			data["sku"] = "standard"
-		}
 		status := http.StatusOK
 		if req.Method == http.MethodPost {
 			if err := os.MkdirAll(t.directory, 0o755); err != nil {
