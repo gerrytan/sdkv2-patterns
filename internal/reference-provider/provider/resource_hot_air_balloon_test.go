@@ -68,6 +68,20 @@ func TestAccHotAirBalloonExteriorColourIndexInvalid(t *testing.T) {
 //go:embed testdata/resource_hot_air_balloon_test_modification_dup.tf
 var testAccHotAirBalloonModificationDupConfig string
 
+//go:embed testdata/resource_hot_air_balloon_test_modification_v2_dup.tf
+var testAccHotAirBalloonModificationV2DupConfig string
+
+func TestAccHotAirBalloonModificationV2DuplicatesInvalid(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		Steps: []resource.TestStep{{
+			Config:      testAccHotAirBalloonModificationV2DupConfig,
+			PlanOnly:    true,
+			ExpectError: regexp.MustCompile(`modification_v2 contains duplicate id "satNav"`),
+		}},
+	})
+}
+
 func TestAccHotAirBalloonModificationDuplicates(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,

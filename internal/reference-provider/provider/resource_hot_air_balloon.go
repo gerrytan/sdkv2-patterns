@@ -15,14 +15,7 @@ import (
 
 func resourceHotAirBalloon() *schema.Resource {
 	return &schema.Resource{
-		Description:   "A hot air balloon flying in the sky.",
-		CreateContext: resourceHotAirBalloonCreate,
-		ReadContext:   resourceHotAirBalloonRead,
-		UpdateContext: resourceHotAirBalloonUpdate,
-		DeleteContext: resourceHotAirBalloonDelete,
-		CustomizeDiff: customdiff.Sequence(
-			resourceHotAirBalloonCustomizeDiff,
-		),
+		Description: "A hot air balloon flying in the sky.",
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:        schema.TypeString,
@@ -52,6 +45,28 @@ func resourceHotAirBalloon() *schema.Resource {
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			// ref-end: working-with-set-schema
+			"modification_v2": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "Modifications to the hot air balloon, identified by unique id.",
+				Set: func(value any) int {
+					return schema.HashString(value.(map[string]any)["id"])
+				},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The identifier of the modification.",
+						},
+						"description": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The description of the modification.",
+						},
+					},
+				},
+			},
 			// ref-start: complex-set-schema
 			"modification": {
 				Type:        schema.TypeSet,
@@ -75,13 +90,21 @@ func resourceHotAirBalloon() *schema.Resource {
 					},
 				},
 			},
+			// ref-end: complex-set-schema
 		},
-		// ref-end: complex-set-schema
+		CreateContext: resourceHotAirBalloonCreate,
+		ReadContext:   resourceHotAirBalloonRead,
+		UpdateContext: resourceHotAirBalloonUpdate,
+		DeleteContext: resourceHotAirBalloonDelete,
+		CustomizeDiff: customdiff.Sequence(
+			resourceHotAirBalloonAdditionalGasTankSkuCustomizeDiff,
+			resourceHotAirBalloonModificationV2CustomizeDiff,
+		),
 	}
 }
 
 // ref-start: validating-multi-fields-customdiff
-func resourceHotAirBalloonCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ any) error {
+func resourceHotAirBalloonAdditionalGasTankSkuCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ any) error {
 	config := d.GetRawConfig()
 	if config.IsNull() || !config.IsKnown() {
 		return nil
@@ -101,6 +124,33 @@ func resourceHotAirBalloonCustomizeDiff(_ context.Context, d *schema.ResourceDif
 }
 
 // ref-end: validating-multi-fields-customdiff
+
+func resourceHotAirBalloonModificationV2CustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ any) error {
+	config := d.GetRawConfig()
+	if config.IsNull() || !config.IsKnown() {
+		return nil
+	}
+	modifications := config.GetAttr("modification_v2")
+	if modifications.IsNull() || !modifications.IsKnown() {
+		return nil
+	}
+	seen := make(map[string]bool)
+	for iterator := modifications.ElementIterator(); iterator.Next(); {
+		_, modification := iterator.Element()
+		if modification.IsNull() || !modification.IsKnown() {
+			continue
+		}
+		id := modification.GetAttr("id")
+		if id.IsNull() || !id.IsKnown() {
+			continue
+		}
+		if seen[id.AsString()] {
+			return fmt.Errorf("modification_v2 contains duplicate id %q", id.AsString())
+		}
+		seen[id.AsString()] = true
+	}
+	return nil
+}
 
 func resourceHotAirBalloonCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	name := d.Get("name").(string)
@@ -124,7 +174,7 @@ func resourceHotAirBalloonRead(ctx context.Context, d *schema.ResourceData, meta
 	if err := d.Set("name", name); err != nil {
 		return diag.FromErr(err)
 	}
-	for _, key := range []string{"sku", "additional_gas_tank", "exterior_colour", "modification"} {
+	for _, key := range []string{"sku", "additional_gas_tank", "exterior_colour", "modification", "modification_v2"} {
 		if err := d.Set(key, result[key]); err != nil {
 			return diag.FromErr(err)
 		}
@@ -161,5 +211,6 @@ func hotAirBalloonPayload(d *schema.ResourceData) map[string]any {
 		"additional_gas_tank": d.Get("additional_gas_tank"),
 		"exterior_colour":     d.Get("exterior_colour").(*schema.Set).List(),
 		"modification":        d.Get("modification").(*schema.Set).List(),
+		"modification_v2":     d.Get("modification_v2").(*schema.Set).List(),
 	}
 }
