@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 
+	"sdkv2-patterns/internal/reference-provider/mockclient"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -41,7 +43,7 @@ func resourcePaperPlane() *schema.Resource {
 
 func resourcePaperPlaneCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	name := d.Get("name").(string)
-	_, err := meta.(*HelloConfig).Client.request(ctx, http.MethodPut, "hello_paper_plane", name, paperPlanePayload(d))
+	_, err := meta.(*HelloConfig).Client.Request(ctx, http.MethodPut, "hello_paper_plane", name, paperPlanePayload(d))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -50,11 +52,11 @@ func resourcePaperPlaneCreate(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourcePaperPlaneRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	resourceType, name, err := parseResourceID(d.Id())
+	resourceType, name, err := mockclient.ParseResourceID(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	result, err := meta.(*HelloConfig).Client.request(ctx, http.MethodGet, resourceType, name, nil)
+	result, err := meta.(*HelloConfig).Client.Request(ctx, http.MethodGet, resourceType, name, nil)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -70,22 +72,22 @@ func resourcePaperPlaneRead(ctx context.Context, d *schema.ResourceData, meta an
 }
 
 func resourcePaperPlaneUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	resourceType, name, err := parseResourceID(d.Id())
+	resourceType, name, err := mockclient.ParseResourceID(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if _, err := meta.(*HelloConfig).Client.request(ctx, http.MethodPut, resourceType, name, paperPlanePayload(d)); err != nil {
+	if _, err := meta.(*HelloConfig).Client.Request(ctx, http.MethodPut, resourceType, name, paperPlanePayload(d)); err != nil {
 		return diag.FromErr(err)
 	}
 	return resourcePaperPlaneRead(ctx, d, meta)
 }
 
 func resourcePaperPlaneDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	resourceType, name, err := parseResourceID(d.Id())
+	resourceType, name, err := mockclient.ParseResourceID(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if _, err := meta.(*HelloConfig).Client.request(ctx, http.MethodDelete, resourceType, name, nil); err != nil && !mockNotFound(err) {
+	if _, err := meta.(*HelloConfig).Client.Request(ctx, http.MethodDelete, resourceType, name, nil); err != nil && !mockclient.IsNotFound(err) {
 		return diag.FromErr(err)
 	}
 	d.SetId("")

@@ -3,12 +3,12 @@ package provider
 import (
 	"context"
 	"encoding/json"
-	"errors"
-	"net/http"
 	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
+
+	"sdkv2-patterns/internal/reference-provider/mockclient"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -39,7 +39,7 @@ func TestMockResourceCRUD(t *testing.T) {
 		t.Run(test.resourceType, func(t *testing.T) {
 			t.Chdir(t.TempDir())
 			ctx := context.Background()
-			client, err := newMockClient()
+			client, err := mockclient.New()
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -77,7 +77,7 @@ func TestMockResourceCRUD(t *testing.T) {
 				t.Fatal("API default SKU was not persisted and read into state")
 			}
 			// A fresh client and empty Terraform state must recover all fields.
-			client, err = newMockClient()
+			client, err = mockclient.New()
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -120,38 +120,5 @@ func TestMockResourceCRUD(t *testing.T) {
 				t.Fatalf("deleting a missing resource should succeed: %v", diagnostics)
 			}
 		})
-	}
-}
-
-func TestMockClientPUTUpsert(t *testing.T) {
-	t.Chdir(t.TempDir())
-	client, err := newMockClient()
-	if err != nil {
-		t.Fatal(err)
-	}
-	ctx := context.Background()
-	// Resource types do not need to be registered with the transport.
-	for _, resourceType := range []string{"hello_future_resource", "hello_another_resource"} {
-		for _, value := range []string{"created", "updated"} {
-			if _, err := client.request(ctx, http.MethodPut, resourceType, "same-name", map[string]any{"value": value}); err != nil {
-				t.Fatal(err)
-			}
-			result, err := client.request(ctx, http.MethodGet, resourceType, "same-name", nil)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if result["value"] != value {
-				t.Fatalf("expected %q, got %#v", value, result)
-			}
-		}
-	}
-	entries, err := os.ReadDir("hello_mock_client_data")
-	if err != nil || len(entries) != 2 {
-		t.Fatalf("expected one file per resource type and name, got %v: %v", entries, err)
-	}
-	_, err = client.request(ctx, http.MethodPost, "hello_future_resource", "same-name", map[string]any{"value": "unexpected"})
-	var apiError *mockHTTPError
-	if !errors.As(err, &apiError) || apiError.StatusCode != http.StatusMethodNotAllowed {
-		t.Fatalf("expected POST to return HTTP 405, got %v", err)
 	}
 }
