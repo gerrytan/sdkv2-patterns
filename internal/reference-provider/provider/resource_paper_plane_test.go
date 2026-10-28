@@ -15,7 +15,10 @@ func TestAccPaperPlaneDefaultSKU(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{{
 			Config: testAccPaperPlaneDefaultSKUConfig,
-			Check:  resource.TestCheckResourceAttr("hello_paper_plane.test", "sku", "standard"),
+			Check: resource.ComposeTestCheckFunc(
+				resource.TestCheckResourceAttr("hello_paper_plane.test", "sku", "standard"),
+				resource.TestCheckResourceAttr("hello_paper_plane.test", "id", "hello_paper_plane/test-paper-plane"),
+			),
 		}},
 	})
 }

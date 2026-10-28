@@ -25,6 +25,7 @@ func resourceHotAirBalloon() *schema.Resource {
 			"name": {
 				Type:        schema.TypeString,
 				Required:    true,
+				ForceNew:    true,
 				Description: "The name of the hot air balloon.",
 			},
 			// ref-start: validating-multi-fields-schema
@@ -100,24 +101,28 @@ func resourceHotAirBalloonCustomizeDiff(_ context.Context, d *schema.ResourceDif
 // ref-end: validating-multi-fields-customdiff
 
 func resourceHotAirBalloonCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	result, err := meta.(*HelloConfig).Client.request(ctx, http.MethodPost, "hello_hot_air_balloon", "", hotAirBalloonPayload(d))
+	name := d.Get("name").(string)
+	_, err := meta.(*HelloConfig).Client.request(ctx, http.MethodPut, "hello_hot_air_balloon", name, hotAirBalloonPayload(d))
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.SetId(result["id"].(string))
+	d.SetId("hello_hot_air_balloon/" + name)
 	return resourceHotAirBalloonRead(ctx, d, meta)
 }
 
 func resourceHotAirBalloonRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	result, err := meta.(*HelloConfig).Client.request(ctx, http.MethodGet, "hello_hot_air_balloon", d.Id(), nil)
-	if mockNotFound(err) {
-		d.SetId("")
-		return nil
-	}
+	resourceType, name, err := parseResourceID(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	for _, key := range []string{"name", "sku", "additional_gas_tank", "exterior_colour", "modification"} {
+	result, err := meta.(*HelloConfig).Client.request(ctx, http.MethodGet, resourceType, name, nil)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("name", name); err != nil {
+		return diag.FromErr(err)
+	}
+	for _, key := range []string{"sku", "additional_gas_tank", "exterior_colour", "modification"} {
 		if err := d.Set(key, result[key]); err != nil {
 			return diag.FromErr(err)
 		}
@@ -126,14 +131,22 @@ func resourceHotAirBalloonRead(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourceHotAirBalloonUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	if _, err := meta.(*HelloConfig).Client.request(ctx, http.MethodPut, "hello_hot_air_balloon", d.Id(), hotAirBalloonPayload(d)); err != nil {
+	resourceType, name, err := parseResourceID(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	if _, err := meta.(*HelloConfig).Client.request(ctx, http.MethodPut, resourceType, name, hotAirBalloonPayload(d)); err != nil {
 		return diag.FromErr(err)
 	}
 	return resourceHotAirBalloonRead(ctx, d, meta)
 }
 
 func resourceHotAirBalloonDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	if _, err := meta.(*HelloConfig).Client.request(ctx, http.MethodDelete, "hello_hot_air_balloon", d.Id(), nil); err != nil && !mockNotFound(err) {
+	resourceType, name, err := parseResourceID(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	if _, err := meta.(*HelloConfig).Client.request(ctx, http.MethodDelete, resourceType, name, nil); err != nil && !mockNotFound(err) {
 		return diag.FromErr(err)
 	}
 	d.SetId("")
@@ -142,7 +155,6 @@ func resourceHotAirBalloonDelete(ctx context.Context, d *schema.ResourceData, me
 
 func hotAirBalloonPayload(d *schema.ResourceData) map[string]any {
 	return map[string]any{
-		"name":                d.Get("name"),
 		"sku":                 d.Get("sku"),
 		"additional_gas_tank": d.Get("additional_gas_tank"),
 		"exterior_colour":     d.Get("exterior_colour").(*schema.Set).List(),

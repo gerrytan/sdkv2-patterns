@@ -20,6 +20,7 @@ func resourcePaperPlane() *schema.Resource {
 			"name": {
 				Type:        schema.TypeString,
 				Required:    true,
+				ForceNew:    true,
 				Description: "The name of the paper plane.",
 			},
 			"exterior_colour": {
@@ -39,24 +40,28 @@ func resourcePaperPlane() *schema.Resource {
 }
 
 func resourcePaperPlaneCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	result, err := meta.(*HelloConfig).Client.request(ctx, http.MethodPost, "hello_paper_plane", "", paperPlanePayload(d))
+	name := d.Get("name").(string)
+	_, err := meta.(*HelloConfig).Client.request(ctx, http.MethodPut, "hello_paper_plane", name, paperPlanePayload(d))
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.SetId(result["id"].(string))
+	d.SetId("hello_paper_plane/" + name)
 	return resourcePaperPlaneRead(ctx, d, meta)
 }
 
 func resourcePaperPlaneRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	result, err := meta.(*HelloConfig).Client.request(ctx, http.MethodGet, "hello_paper_plane", d.Id(), nil)
-	if mockNotFound(err) {
-		d.SetId("")
-		return nil
-	}
+	resourceType, name, err := parseResourceID(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	for _, key := range []string{"name", "sku", "exterior_colour"} {
+	result, err := meta.(*HelloConfig).Client.request(ctx, http.MethodGet, resourceType, name, nil)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("name", name); err != nil {
+		return diag.FromErr(err)
+	}
+	for _, key := range []string{"sku", "exterior_colour"} {
 		if err := d.Set(key, result[key]); err != nil {
 			return diag.FromErr(err)
 		}
@@ -65,14 +70,22 @@ func resourcePaperPlaneRead(ctx context.Context, d *schema.ResourceData, meta an
 }
 
 func resourcePaperPlaneUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	if _, err := meta.(*HelloConfig).Client.request(ctx, http.MethodPut, "hello_paper_plane", d.Id(), paperPlanePayload(d)); err != nil {
+	resourceType, name, err := parseResourceID(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	if _, err := meta.(*HelloConfig).Client.request(ctx, http.MethodPut, resourceType, name, paperPlanePayload(d)); err != nil {
 		return diag.FromErr(err)
 	}
 	return resourcePaperPlaneRead(ctx, d, meta)
 }
 
 func resourcePaperPlaneDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	if _, err := meta.(*HelloConfig).Client.request(ctx, http.MethodDelete, "hello_paper_plane", d.Id(), nil); err != nil && !mockNotFound(err) {
+	resourceType, name, err := parseResourceID(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	if _, err := meta.(*HelloConfig).Client.request(ctx, http.MethodDelete, resourceType, name, nil); err != nil && !mockNotFound(err) {
 		return diag.FromErr(err)
 	}
 	d.SetId("")
@@ -85,7 +98,6 @@ func paperPlanePayload(d *schema.ResourceData) map[string]any {
 		sku = "standard"
 	}
 	return map[string]any{
-		"name":            d.Get("name"),
 		"sku":             sku,
 		"exterior_colour": d.Get("exterior_colour"),
 	}
