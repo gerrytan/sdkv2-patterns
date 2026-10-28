@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -10,7 +11,7 @@ import (
 
 func resourcePaperPlane() *schema.Resource {
 	return &schema.Resource{
-		Description:   "A state-only paper plane for demonstrating SDKv2 patterns.",
+		Description:   "You fold it, you throw it.",
 		CreateContext: resourcePaperPlaneCreate,
 		ReadContext:   resourcePaperPlaneRead,
 		UpdateContext: resourcePaperPlaneUpdate,
@@ -37,26 +38,51 @@ func resourcePaperPlane() *schema.Resource {
 	}
 }
 
-func resourcePaperPlaneCreate(_ context.Context, d *schema.ResourceData, _ any) diag.Diagnostics {
-	if _, ok := d.GetOk("sku"); !ok {
-		if err := d.Set("sku", "standard"); err != nil {
+func resourcePaperPlaneCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+	result, err := meta.(*HelloConfig).Client.request(ctx, http.MethodPost, "hello_paper_plane", "", paperPlanePayload(d))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.SetId(result["id"].(string))
+	return resourcePaperPlaneRead(ctx, d, meta)
+}
+
+func resourcePaperPlaneRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+	result, err := meta.(*HelloConfig).Client.request(ctx, http.MethodGet, "hello_paper_plane", d.Id(), nil)
+	if mockNotFound(err) {
+		d.SetId("")
+		return nil
+	}
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	for _, key := range []string{"name", "sku", "exterior_colour"} {
+		if err := d.Set(key, result[key]); err != nil {
 			return diag.FromErr(err)
 		}
 	}
-	d.SetId(d.Get("name").(string))
 	return nil
 }
 
-func resourcePaperPlaneRead(_ context.Context, _ *schema.ResourceData, _ any) diag.Diagnostics {
-	return nil
+func resourcePaperPlaneUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+	if _, err := meta.(*HelloConfig).Client.request(ctx, http.MethodPut, "hello_paper_plane", d.Id(), paperPlanePayload(d)); err != nil {
+		return diag.FromErr(err)
+	}
+	return resourcePaperPlaneRead(ctx, d, meta)
 }
 
-func resourcePaperPlaneUpdate(_ context.Context, d *schema.ResourceData, _ any) diag.Diagnostics {
-	d.SetId(d.Get("name").(string))
-	return nil
-}
-
-func resourcePaperPlaneDelete(_ context.Context, d *schema.ResourceData, _ any) diag.Diagnostics {
+func resourcePaperPlaneDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+	if _, err := meta.(*HelloConfig).Client.request(ctx, http.MethodDelete, "hello_paper_plane", d.Id(), nil); err != nil && !mockNotFound(err) {
+		return diag.FromErr(err)
+	}
 	d.SetId("")
 	return nil
+}
+
+func paperPlanePayload(d *schema.ResourceData) map[string]any {
+	return map[string]any{
+		"name":            d.Get("name"),
+		"sku":             d.Get("sku"),
+		"exterior_colour": d.Get("exterior_colour"),
+	}
 }
