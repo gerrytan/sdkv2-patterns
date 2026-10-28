@@ -66,25 +66,24 @@ The situation gets more confusing with a complex set with a custom hash. Conside
 <!-- ref-start ref="internal/reference-provider/provider/resource_hot_air_balloon.go#complex-set-schema" lang="go" -->
 
 ```go
-	"modification": {
-		Type:        schema.TypeSet,
-		Optional:    true,
-		Description: "Modifications to the hot air balloon, identified by id.",
-		Set: func(value any) int {
-			return schema.HashString(value.(map[string]any)["id"])
-		},
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"id": {
-					Type:        schema.TypeString,
-					Required:    true,
-					Description: "The identifier of the modification.",
-				},
-				"description": {
-					Type:        schema.TypeString,
-					Required:    true,
-					Description: "The description of the modification.",
-				},
+"modification": {
+	Type:        schema.TypeSet,
+	Optional:    true,
+	Description: "Modifications to the hot air balloon, identified by id.",
+	Set: func(value any) int {
+		return schema.HashString(value.(map[string]any)["id"])
+	},
+	Elem: &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"id": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The identifier of the modification.",
+			},
+			"description": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The description of the modification.",
 			},
 		},
 	},

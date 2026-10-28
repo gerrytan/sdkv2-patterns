@@ -31,7 +31,7 @@ Following is an example on how to use a `CustomizeDiff` function to validate mul
 <!-- ref-start ref="internal/reference-provider/provider/resource_hot_air_balloon.go#validating-multi-fields-customdiff" lang="go" -->
 
 ```go
-func resourceHotAirBalloonCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ any) error {
+func resourceHotAirBalloonAdditionalGasTankSkuCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ any) error {
 	config := d.GetRawConfig()
 	if config.IsNull() || !config.IsKnown() {
 		return nil

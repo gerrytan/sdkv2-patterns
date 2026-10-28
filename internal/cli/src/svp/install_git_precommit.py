@@ -9,6 +9,7 @@ set -eu
 
 cd "$(git rev-parse --show-toplevel)"
 if ! git diff --cached --quiet --no-renames -- ':(glob)**/*.md' '.github/workflows/check-markdown.yml'; then
+    echo 'Pre-commit: checking README table of contents...'
     uv run --locked --project internal/cli svp build-toc
     if ! git diff --exit-code -- README.md; then
         cat >&2 <<'EOF'
@@ -23,7 +24,24 @@ EOF
     fi
 fi
 
+if ! git diff --cached --quiet --no-renames -- ':(glob)**/*.md' ':(glob)internal/reference-provider/**' ':(glob)internal/cli/**' '.github/workflows/check-markdown.yml'; then
+    echo 'Pre-commit: checking Markdown code references...'
+    uv run --locked --project internal/cli svp build-code-ref
+    if ! git diff --exit-code -- ':(glob)**/*.md'; then
+        cat >&2 <<'EOF'
+Error: Markdown code references differ from the staged content.
+The code reference builder has run. Review the Markdown changes, then stage the updated files:
+    git add <updated-markdown-files>
+Retry your commit after staging the updates.
+To regenerate code references manually:
+    uv run --locked --project internal/cli svp build-code-ref
+EOF
+        exit 1
+    fi
+fi
+
 if ! git diff --cached --quiet --no-renames -- ':(glob)internal/cli/**' '.github/workflows/test-cli.yml'; then
+    echo 'Pre-commit: running CLI unit tests...'
     uv run --locked --project internal/cli python -m unittest discover -s internal/cli/tests -v
 fi
 """

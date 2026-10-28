@@ -86,6 +86,11 @@ class InstallGitPrecommitTests(unittest.TestCase):
             '        printf "updated TOC\\n" > README.md\n'
             '    fi\n'
             '    exit "${BUILD_EXIT:-0}" ;;\n'
+            '  *build-code-ref)\n'
+            '    if [ "${UPDATE_CODE_REF:-0}" = 1 ]; then\n'
+            '        printf "updated code reference\\n" > example.md\n'
+            '    fi\n'
+            '    exit "${CODE_REF_EXIT:-0}" ;;\n'
             '  *) exit "${TEST_EXIT:-0}" ;;\n'
             'esac\n',
             encoding="utf-8",
@@ -110,9 +115,9 @@ class InstallGitPrecommitTests(unittest.TestCase):
         self.git("add", "internal/cli/main.py")
 
         for build_exit, test_exit, dirty, expected_exit, expected_calls in (
-            (0, 0, False, 0, 2),
+            (0, 0, False, 0, 3),
             (7, 0, False, 7, 1),
-            (0, 9, False, 9, 2),
+            (0, 9, False, 9, 3),
             (0, 0, True, 1, 1),
         ):
             with self.subTest(build_exit=build_exit, test_exit=test_exit, dirty=dirty):
@@ -138,9 +143,13 @@ class InstallGitPrecommitTests(unittest.TestCase):
                 self.assertEqual(
                     commands[0], "run --locked --project internal/cli svp build-toc"
                 )
-                if expected_calls == 2:
+                if expected_calls == 3:
                     self.assertEqual(
                         commands[1],
+                        "run --locked --project internal/cli svp build-code-ref",
+                    )
+                    self.assertEqual(
+                        commands[2],
                         "run --locked --project internal/cli python -m unittest discover -s internal/cli/tests -v",
                     )
 
@@ -152,14 +161,15 @@ class InstallGitPrecommitTests(unittest.TestCase):
         self.git("-c", "user.name=Test", "-c", "user.email=test@example.com",
                  "-c", "core.hooksPath=/dev/null", "commit", "-m", "Initial")
 
-        for filename, expected_command in (
-            ("unrelated.txt", None),
-            ("README.md", "build-toc"),
-            ("validation/deep/example.md", "build-toc"),
-            (".github/workflows/check-markdown.yml", "build-toc"),
-            ("internal/cli/src/example.py", "unittest"),
-            ("internal/cli/uv.lock", "unittest"),
-            (".github/workflows/test-cli.yml", "unittest"),
+        for filename, expected_commands in (
+            ("unrelated.txt", []),
+            ("README.md", ["build-toc", "build-code-ref"]),
+            ("validation/deep/example.md", ["build-toc", "build-code-ref"]),
+            (".github/workflows/check-markdown.yml", ["build-toc", "build-code-ref"]),
+            ("internal/reference-provider/provider/example.go", ["build-code-ref"]),
+            ("internal/cli/src/example.py", ["build-code-ref", "unittest"]),
+            ("internal/cli/uv.lock", ["build-code-ref", "unittest"]),
+            (".github/workflows/test-cli.yml", ["unittest"]),
         ):
             with self.subTest(filename=filename):
                 self.git("reset", "--quiet")
@@ -175,11 +185,9 @@ class InstallGitPrecommitTests(unittest.TestCase):
                 )
                 self.assertEqual(result.returncode, 0, result.stderr)
                 commands = calls.read_text(encoding="utf-8").splitlines()
-                if expected_command is None:
-                    self.assertEqual(commands, [])
-                else:
-                    self.assertEqual(len(commands), 1)
-                    self.assertIn(expected_command, commands[0])
+                self.assertEqual(len(commands), len(expected_commands))
+                for command, expected in zip(commands, expected_commands):
+                    self.assertIn(expected, command)
 
         # Unstaged relevant files must not trigger checks.
         self.git("reset", "--quiet")
@@ -207,6 +215,46 @@ class InstallGitPrecommitTests(unittest.TestCase):
         self.assertEqual(readme.read_text(encoding="utf-8"), "updated TOC\n")
 
         self.git("add", "README.md")
+        result = subprocess.run(
+            [str(self.hook_path)], cwd=self.root, env=environment,
+            capture_output=True, text=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_code_reference_failure_blocks_commit(self) -> None:
+        calls, environment = self.prepare_hook()
+        source = self.root / "internal/reference-provider/provider/example.go"
+        source.parent.mkdir(parents=True)
+        source.write_text("package provider\n", encoding="utf-8")
+        self.git("add", str(source))
+        result = subprocess.run(
+            [str(self.hook_path)], cwd=self.root,
+            env=dict(environment, CODE_REF_EXIT="8"),
+            capture_output=True, text=True,
+        )
+        self.assertEqual(result.returncode, 8, result.stderr)
+        self.assertIn("checking Markdown code references", result.stdout)
+        self.assertEqual(
+            calls.read_text(encoding="utf-8").splitlines(),
+            ["run --locked --project internal/cli svp build-code-ref"],
+        )
+
+    def test_generated_code_references_must_be_staged_before_retrying(self) -> None:
+        _, environment = self.prepare_hook()
+        markdown = self.root / "example.md"
+        markdown.write_text("stale code reference\n", encoding="utf-8")
+        self.git("add", "example.md")
+        environment["UPDATE_CODE_REF"] = "1"
+        result = subprocess.run(
+            [str(self.hook_path)], cwd=self.root, env=environment,
+            capture_output=True, text=True,
+        )
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("git add <updated-markdown-files>", result.stderr)
+        self.assertIn("svp build-code-ref", result.stderr)
+        self.assertEqual(markdown.read_text(encoding="utf-8"), "updated code reference\n")
+
+        self.git("add", "example.md")
         result = subprocess.run(
             [str(self.hook_path)], cwd=self.root, env=environment,
             capture_output=True, text=True,
