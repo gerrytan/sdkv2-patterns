@@ -25,7 +25,7 @@ resource "hello_hot_air_balloon" "test" {
 `, sku, tanks)
 }
 
-//go:embed resource_hot_air_balloon_test_set_dup.tf
+//go:embed testdata/resource_hot_air_balloon_test_set_dup.tf
 var testAccHotAirBalloonSetDupConfig string
 
 func TestAccHotAirBalloonExteriorColourDuplicates(t *testing.T) {
@@ -51,7 +51,7 @@ func TestAccHotAirBalloonExteriorColourDuplicates(t *testing.T) {
 	})
 }
 
-//go:embed resource_hot_air_balloon_test_set_index.tf
+//go:embed testdata/resource_hot_air_balloon_test_set_index.tf
 var testAccHotAirBalloonSetIndexConfig string
 
 func TestAccHotAirBalloonExteriorColourIndexInvalid(t *testing.T) {
@@ -65,7 +65,7 @@ func TestAccHotAirBalloonExteriorColourIndexInvalid(t *testing.T) {
 	})
 }
 
-//go:embed resource_hot_air_balloon_test_modification_dup.tf
+//go:embed testdata/resource_hot_air_balloon_test_modification_dup.tf
 var testAccHotAirBalloonModificationDupConfig string
 
 func TestAccHotAirBalloonModificationDuplicates(t *testing.T) {
@@ -133,7 +133,7 @@ func TestAccHotAirBalloonAdditionalGasTankInvalid(t *testing.T) {
 	}
 }
 
-//go:embed resource_hot_air_balloon_test_value_unknown.tf
+//go:embed testdata/resource_hot_air_balloon_test_value_unknown.tf
 var testAccHotAirBalloonValueUnknownConfig string
 
 func TestAccHotAirBalloonInvalidAdditionalGasTankAllowedIfValueIsUnknown(t *testing.T) {

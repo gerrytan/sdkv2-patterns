@@ -22,7 +22,7 @@ Set implicitly enforces uniqueness. Duplicate values can still be specified, but
 
 Although 3 `exterior_colour` values are specified in config, only 2 are stored into state because "red" is duplicated[^1]:
 
-<!-- ref-start file="internal/reference-provider/provider/resource_hot_air_balloon_test_set_dup.tf" lang="terraform" -->
+<!-- ref-start file="internal/reference-provider/provider/testdata/resource_hot_air_balloon_test_set_dup.tf" lang="terraform" -->
 
 ```terraform
 resource "hello_hot_air_balloon" "test" {
@@ -40,7 +40,7 @@ If the values are replaced with `["blue", "red"]`, the plan diff will be empty b
 
 Set elements cannot be indexed and referenced by another resource. The example configuration below:
 
-<!-- ref-start file="internal/reference-provider/provider/resource_hot_air_balloon_test_set_index.tf" lang="terraform" -->
+<!-- ref-start file="internal/reference-provider/provider/testdata/resource_hot_air_balloon_test_set_index.tf" lang="terraform" -->
 
 ```terraform
 resource "hello_hot_air_balloon" "test" {
@@ -95,7 +95,7 @@ The situation gets more confusing with a complex set with a custom hash. Conside
 
 If the user mistakenly supplied the same id twice, the last one wins and overwrites the previous one[^3].
 
-<!-- ref-start file="internal/reference-provider/provider/resource_hot_air_balloon_test_modification_dup.tf" lang="terraform" -->
+<!-- ref-start file="internal/reference-provider/provider/testdata/resource_hot_air_balloon_test_modification_dup.tf" lang="terraform" -->
 
 ```terraform
 resource "hello_hot_air_balloon" "test" {

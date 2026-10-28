@@ -57,7 +57,7 @@ Observe how `IsKnown` value check is performed on each fields, and the validator
 
 In the below example, `hello_hot_air_balloon.test` is invalid because the `sku` is `standard`, but the value is not known during plan time. The resource will pass validation during plan time, but the `can only be set when sku is premium` validation error will occur during apply time[^2].
 
-<!-- ref-start file="internal/reference-provider/provider/resource_hot_air_balloon_test_value_unknown.tf" lang="terraform" -->
+<!-- ref-start file="internal/reference-provider/provider/testdata/resource_hot_air_balloon_test_value_unknown.tf" lang="terraform" -->
 
 ```terraform
 resource "hello_paper_plane" "test" {
