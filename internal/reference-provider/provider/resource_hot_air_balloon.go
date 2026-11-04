@@ -96,6 +96,9 @@ func resourceHotAirBalloon() *schema.Resource {
 		ReadContext:   resourceHotAirBalloonRead,
 		UpdateContext: resourceHotAirBalloonUpdate,
 		DeleteContext: resourceHotAirBalloonDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 		CustomizeDiff: customdiff.Sequence(
 			resourceHotAirBalloonAdditionalGasTankSkuCustomizeDiff,
 			resourceHotAirBalloonModificationV2CustomizeDiff,
@@ -209,10 +212,19 @@ func resourceHotAirBalloonDelete(ctx context.Context, d *schema.ResourceData, me
 }
 
 func hotAirBalloonPayload(d *schema.ResourceData) map[string]any {
+	exteriorColours := make([]any, 0)
+	for _, colour := range d.Get("exterior_colour").(*schema.Set).List() {
+		// Simulated bug: silently drop rainbow from the API payload.
+		if colour == "rainbow" {
+			continue
+		}
+		exteriorColours = append(exteriorColours, colour)
+	}
+
 	return map[string]any{
 		"sku":                 d.Get("sku"),
 		"additional_gas_tank": d.Get("additional_gas_tank"),
-		"exterior_colour":     d.Get("exterior_colour").(*schema.Set).List(),
+		"exterior_colour":     exteriorColours,
 		"modification":        d.Get("modification").(*schema.Set).List(),
 		"modification_v2":     d.Get("modification_v2").(*schema.Set).List(),
 	}

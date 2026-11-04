@@ -3,6 +3,7 @@ package provider
 import (
 	_ "embed"
 	"fmt"
+	"os"
 	"regexp"
 	"strings"
 	"testing"
@@ -166,3 +167,34 @@ func TestAccHotAirBalloonInvalidAdditionalGasTankAllowedIfValueIsUnknown(t *test
 		},
 	})
 }
+
+func TestAccHotAirBalloonImportStateVerify(t *testing.T) {
+	if os.Getenv("TEST_ACC_IMPORT_STATE_VERIFY") != "true" {
+		// The failure caused by ImportStateVerify cannot be asserted using ExpectError, skip this test instead
+		t.Skip("set TEST_ACC_IMPORT_STATE_VERIFY=true to run this test")
+	}
+	// ref-start: test-assertions-import-state-verify
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// An intentional bug was introduced where the colour "rainbow" is dropped from the API payload
+				Config: `
+resource "hello_hot_air_balloon" "test" {
+  name            = "test-balloon"
+  sku             = "standard"
+  exterior_colour = ["rainbow"]
+}
+`,
+				// Setting this to false would have detected the problem, but intentionally set to true to test ImportStateVerify
+				ExpectNonEmptyPlan: true,
+			},
+			{
+				ResourceName:      "hello_hot_air_balloon.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+	// ref-end: test-assertions-import-state-verify
