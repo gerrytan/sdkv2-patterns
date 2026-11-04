@@ -1,6 +1,6 @@
 # SDKv2 patterns
 
-Collection of common patterns and best practices when using [Terraform Plugin SDKv2](https://developer.hashicorp.com/terraform/plugin/sdkv2).
+Collection of common patterns, unexpected / quirky behaviours and best practices when using [Terraform Plugin SDKv2](https://developer.hashicorp.com/terraform/plugin/sdkv2).
 
 <!-- start-toc -->
 
