@@ -86,6 +86,30 @@ func resourcePaperPlane() *schema.Resource {
 					},
 				},
 			},
+
+			// ref-start: list-top-level-force-new-schema
+			"stickers": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MinItems:    1,
+				Description: "Stickers for the paper plane.",
+				ForceNew:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The identifier of the sticker.",
+						},
+						"description": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The description of the sticker.",
+						},
+					},
+				},
+			},
+			// ref-end: list-top-level-force-new-schema
 		},
 	}
 }
@@ -146,6 +170,7 @@ func resourcePaperPlanePluginsV2DiffSuppress(_ string, _ string, _ string, d *sc
 	}
 	return true
 }
+
 // ref-end: using-list-for-set-diff-suppress
 
 func resourcePaperPlaneCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
@@ -179,7 +204,7 @@ func resourcePaperPlaneRead(ctx context.Context, d *schema.ResourceData, meta an
 			})
 		}
 	}
-	for _, key := range []string{"sku", "exterior_colour", "plugins", "plugins_v2"} {
+	for _, key := range []string{"sku", "exterior_colour", "plugins", "plugins_v2", "stickers"} {
 		if err := d.Set(key, result[key]); err != nil {
 			return diag.FromErr(err)
 		}
@@ -220,5 +245,6 @@ func paperPlanePayload(d *schema.ResourceData) map[string]any {
 		"exterior_colour": d.Get("exterior_colour"),
 		"plugins":         d.Get("plugins"),
 		"plugins_v2":      d.Get("plugins_v2"),
+		"stickers":        d.Get("stickers"),
 	}
 }

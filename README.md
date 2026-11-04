@@ -6,6 +6,7 @@ Collection of common patterns and best practices when using [Terraform Plugin SD
 
 ## Schema Design
 
+- [Top level ForceNew in list](schema-design/list-top-level-force-new.md)
 - [Using list for set](schema-design/using-list-for-set.md)
 - [Working with set](schema-design/working-with-set.md)
 
