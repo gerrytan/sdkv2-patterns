@@ -59,6 +59,6 @@ resource "hello_paper_plane" "test" {
 
 <!-- ref-end -->
 
-Changing the id or description of existing sticker will be done in-place, but if new sticker are added or existing ones removed, full resource replacement will occur.
+Changing the id or description of existing sticker will be done in-place, but if new sticker are added or existing ones removed -- causing list size change, full resource replacement will occur.
 
 - [^1]: Refer to [TestAccPaperPlaneStickersTopLevelOnlyForceNew](../internal/reference-provider/provider/resource_paper_plane_test.go)
