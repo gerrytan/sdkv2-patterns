@@ -1,6 +1,6 @@
 ---
 tocTitle: Working with set
-tocSection: Schema Design
+tocSection: Schema design
 ---
 
 # Working with set

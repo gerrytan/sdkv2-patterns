@@ -1,6 +1,6 @@
 ---
 tocTitle: Top level ForceNew in list
-tocSection: Schema Design
+tocSection: Schema design
 ---
 
 # Top level ForceNew in list

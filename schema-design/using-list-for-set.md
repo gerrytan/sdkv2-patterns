@@ -1,6 +1,6 @@
 ---
 tocTitle: Using list for set
-tocSection: Schema Design
+tocSection: Schema design
 ---
 
 # Using list for set

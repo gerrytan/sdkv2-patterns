@@ -1,6 +1,6 @@
 ---
 tocTitle: Case insensitive API
-tocSection: Schema Design
+tocSection: State management
 ---
 
 # Case insensitive API

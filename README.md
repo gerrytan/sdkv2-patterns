@@ -4,12 +4,15 @@ Collection of common patterns, unexpected / quirky behaviours and best practices
 
 <!-- start-toc -->
 
-## Schema Design
+## Schema design
 
-- [Case insensitive API](schema-design/case-insensitive-api.md)
 - [Top level ForceNew in list](schema-design/list-top-level-force-new.md)
 - [Using list for set](schema-design/using-list-for-set.md)
 - [Working with set](schema-design/working-with-set.md)
+
+## State management
+
+- [Case insensitive API](state-management/case-insensitive-api.md)
 
 ## Testing
 
