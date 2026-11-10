@@ -48,7 +48,7 @@ func resourceHotAirBalloon() *schema.Resource {
 			"modification_v2": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "Modifications to the hot air balloon, identified by unique id.",
+				Description: "Same like modification property, but has uniqueness validation",
 				Set: func(value any) int {
 					return schema.HashString(value.(map[string]any)["id"])
 				},

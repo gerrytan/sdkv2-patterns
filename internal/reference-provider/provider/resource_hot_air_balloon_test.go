@@ -197,4 +197,45 @@ resource "hello_hot_air_balloon" "test" {
 		},
 	})
 }
-	// ref-end: test-assertions-import-state-verify
+
+// ref-end: test-assertions-import-state-verify
+
+func TestAccHotAirBalloonModificationDescriptionUpdate(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: `
+resource "hello_hot_air_balloon" "test" {
+  name = "test-balloon"
+  sku  = "standard"
+
+  modification {
+    id          = "satNav"
+    description = "satellite navigation"
+  }
+}
+`,
+				Check: resource.TestCheckTypeSetElemNestedAttrs("hello_hot_air_balloon.test", "modification.*", map[string]string{
+					"id":          "satNav",
+					"description": "satellite navigation",
+				}),
+			},
+			{
+				Config: `
+resource "hello_hot_air_balloon" "test" {
+  name = "test-balloon"
+  sku  = "standard"
+
+  modification {
+    id          = "satNav"
+    description = "updated satellite navigation"
+  }
+}
+`,
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: false,
+			},
+		},
+	})
+}

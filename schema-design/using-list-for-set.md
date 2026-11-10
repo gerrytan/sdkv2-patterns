@@ -5,7 +5,7 @@ tocSection: Schema design
 
 # Using list for set
 
-Often representing set collection as list in Terraform is preferrable due to known issues with set in SDKv2 (refer to [working with set](working-with-set.md)).
+Sometimes representing set / map collection as list in Terraform is preferrable due to known issues with set in SDKv2 (refer to [working with set](working-with-set.md)).
 
 <!-- ref-start ref="internal/reference-provider/provider/resource_paper_plane.go#using-list-for-set-schema" lang="go" -->
 

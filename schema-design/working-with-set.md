@@ -115,9 +115,33 @@ resource "hello_hot_air_balloon" "test" {
 
 <!-- ref-end -->
 
+But the most surprising behaviour is non-hash element cannot be updated! SDKv2 uses the hash function to determine if there is any diff.
+The following update will result in empty plan diff and the change will not be applied[^4].
+
+
+```diff
+resource "hello_hot_air_balloon" "test" {
+  name = "test-balloon"
+  sku  = "standard"
+
+  modification {
+    id          = "satNav"
+-    description = "satellite navigation"
++    description = "updated satellite navigation but empty plan diff"
+  }
+
+  modification {
+    id          = "satNav"
+    description = "yet another sat nav modification, mistakenly added"
+  }
+}
+```
+
+We can remove the custom hash and default to the built-in that computes every element, but we'll lose the uniqueness guarantee based on the `id` field.
+
 ## Plan-time validation for duplicate elements
 
-Implement a plan-time validation logic to guard against invalid config using a `CustomizeDiff` function similar to below:
+Example of guarding against duplicate `id` at plan time:
 
 <!-- ref-start ref="internal/reference-provider/provider/resource_hot_air_balloon.go#validating-dup-customdiff" lang="go" -->
 
@@ -155,3 +179,4 @@ func resourceHotAirBalloonModificationV2CustomizeDiff(_ context.Context, d *sche
 [^1]: Refer to [`TestAccHotAirBalloonExteriorColourDuplicates`](../internal/reference-provider/provider/resource_hot_air_balloon_test.go)
 [^2]: Refer to [`TestAccHotAirBalloonExteriorColourIndexInvalid`](../internal/reference-provider/provider/resource_hot_air_balloon_test.go)
 [^3]: Refer to [`TestAccHotAirBalloonModificationDuplicates`](../internal/reference-provider/provider/resource_hot_air_balloon_test.go)
+[^4]: Refer to [`TestAccHotAirBalloonModificationDescriptionUpdate`](../internal/reference-provider/provider/resource_hot_air_balloon_test.go)
