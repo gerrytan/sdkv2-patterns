@@ -1,0 +1,9 @@
+# Use TF_CLI_CONFIG_FILE="$PWD/manualtesting/dev.tfrc" terraform -chdir=manualtesting plan to enable this dev override
+
+provider_installation {
+  dev_overrides {
+    "registry.terraform.io/gerrytan/hello" = "/home/gtan/projects/sdkv2-patterns/internal/reference-provider"
+  }
+
+  direct {}
+}

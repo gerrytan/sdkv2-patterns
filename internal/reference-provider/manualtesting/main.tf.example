@@ -1,0 +1,14 @@
+terraform {
+  required_providers {
+    hello = {
+      source = "registry.terraform.io/gerrytan/hello"
+    }
+  }
+}
+
+provider "hello" {}
+
+resource "hello_aeroplane" "test" {
+  name              = "test-aeroplane"
+  registration_code = "ABC123"
+}

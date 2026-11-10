@@ -20,6 +20,7 @@ func New() *schema.Provider {
 			return &HelloConfig{Client: client}, diag.FromErr(err)
 		},
 		ResourcesMap: map[string]*schema.Resource{
+			"hello_aeroplane":       resourceAeroplane(),
 			"hello_hot_air_balloon": resourceHotAirBalloon(),
 			"hello_paper_plane":     resourcePaperPlane(),
 		},
