@@ -92,6 +92,8 @@ The situation gets more confusing with a complex set with a custom hash. Conside
 
 <!-- ref-end -->
 
+### Silent overwrite
+
 If the user mistakenly supplied the same id twice, the last one wins and overwrites the previous one[^3].
 
 <!-- ref-start file="internal/reference-provider/provider/testdata/resource_hot_air_balloon_test_modification_dup.tf" lang="terraform" -->
@@ -114,6 +116,8 @@ resource "hello_hot_air_balloon" "test" {
 ```
 
 <!-- ref-end -->
+
+### Non-hash element update gotchas
 
 But the most surprising behaviour is non-hash element cannot be updated! SDKv2 uses the hash function to determine if there is any diff.
 The following update will result in empty plan diff and the change will not be applied[^4].
