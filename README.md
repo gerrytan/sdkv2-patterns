@@ -6,6 +6,7 @@ Collection of common patterns, unexpected / quirky behaviours and best practices
 
 ## Schema design
 
+- [Nested optional computed](schema-design/nested-optional-computed.md)
 - [Top level ForceNew in list](schema-design/list-top-level-force-new.md)
 - [Using list for set](schema-design/using-list-for-set.md)
 - [Working with set](schema-design/working-with-set.md)

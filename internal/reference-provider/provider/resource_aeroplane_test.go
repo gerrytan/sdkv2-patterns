@@ -11,7 +11,7 @@ import (
 //go:embed testdata/resource_aeroplane_test.tf
 var testAccAeroplaneConfig string
 
-func TestAccAeroplane(t *testing.T) {
+func TestAccAeroplaneCaseSensitivity(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
@@ -34,5 +34,28 @@ resource "hello_aeroplane" "test" {
 				},
 			},
 		},
+	})
+}
+
+func TestAccAeroplaneEngineTypeOnly(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		Steps: []resource.TestStep{{
+			Config: `
+resource "hello_aeroplane" "test" {
+  name              = "test-aeroplane-engine-type-only"
+  registration_code = "ABC123"
+
+  engine {
+    type = "propeller"
+  }
+}
+`,
+			Check: resource.ComposeTestCheckFunc(
+				resource.TestCheckResourceAttr("hello_aeroplane.test", "engine.0.type", "propeller"),
+				resource.TestCheckResourceAttr("hello_aeroplane.test", "engine.0.speed", "low"),
+			),
+			ExpectNonEmptyPlan: true,
+		}},
 	})
 }

@@ -23,7 +23,6 @@ Schema: map[string]*schema.Schema{
 		ForceNew:    true,
 		Description: "The registration code of the aeroplane.",
 	},
-},
 ```
 
 <!-- ref-end -->
