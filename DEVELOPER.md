@@ -6,12 +6,22 @@
 2. [go](https://golang.org/doc/install)
 3. [tfenv](https://github.com/tfutils/tfenv#installation)
 
-## Pre-commit hook
+## 1. Install the CLI
+
+From the repository root, install the CLI:
+
+```sh
+uv tool install --editable ./internal/cli
+```
+
+Ensure uv's tool executable directory is on your `PATH` (`uv tool update-shell` can configure it).
+
+## 2. Install the pre-commit hook
 
 Install the pre-commit hook for early validation of code changes.
 
 ```sh
-uv run --locked --project internal/cli svp install-git-precommit
+sdkv2-patterns-cli install-git-precommit
 ```
 
 ## Running SDKv2 hello reference provider acceptance test
@@ -28,4 +38,4 @@ TF_ACC=1 go -C internal/reference-provider test ./... -v -count=1 -run="^TestAcc
 
 ## Other useful commands
 
-See `uv run --locked --project internal/cli svp --help`
+See `sdkv2-patterns-cli --help`

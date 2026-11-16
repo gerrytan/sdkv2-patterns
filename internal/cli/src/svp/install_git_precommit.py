@@ -2,7 +2,7 @@ import subprocess
 from pathlib import Path
 
 
-HOOK_HEADER = "#!/bin/sh\n# Installed by svp install-git-precommit.\n"
+HOOK_HEADER = "#!/bin/sh\n# Installed by sdkv2-patterns-cli install-git-precommit.\n"
 
 HOOK = HOOK_HEADER + """\
 set -eu
@@ -10,7 +10,7 @@ set -eu
 cd "$(git rev-parse --show-toplevel)"
 if ! git diff --cached --quiet --no-renames -- ':(glob)**/*.md' '.github/workflows/check-markdown.yml'; then
     echo 'Pre-commit: checking README table of contents...'
-    uv run --locked --project internal/cli svp build-toc
+    uv run --locked --project internal/cli sdkv2-patterns-cli build-toc
     if ! git diff --exit-code -- README.md; then
         cat >&2 <<'EOF'
 Error: README.md differs from the staged table of contents.
@@ -18,7 +18,7 @@ The TOC builder has run. Review README.md, then stage the updated TOC:
     git add README.md
 Retry your commit after staging the update.
 To regenerate the TOC manually:
-    uv run --locked --project internal/cli svp build-toc
+    uv run --locked --project internal/cli sdkv2-patterns-cli build-toc
 EOF
         exit 1
     fi
@@ -26,7 +26,7 @@ fi
 
 if ! git diff --cached --quiet --no-renames -- ':(glob)**/*.md' ':(glob)internal/reference-provider/**' ':(glob)internal/cli/**' '.github/workflows/check-markdown.yml'; then
     echo 'Pre-commit: checking Markdown code references...'
-    uv run --locked --project internal/cli svp build-code-ref
+    uv run --locked --project internal/cli sdkv2-patterns-cli build-code-ref
     if ! git diff --exit-code -- ':(glob)**/*.md'; then
         cat >&2 <<'EOF'
 Error: Markdown code references differ from the staged content.
@@ -34,7 +34,7 @@ The code reference builder has run. Review the Markdown changes, then stage the 
     git add <updated-markdown-files>
 Retry your commit after staging the updates.
 To regenerate code references manually:
-    uv run --locked --project internal/cli svp build-code-ref
+    uv run --locked --project internal/cli sdkv2-patterns-cli build-code-ref
 EOF
         exit 1
     fi
