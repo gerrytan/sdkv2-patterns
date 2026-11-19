@@ -42,9 +42,9 @@ resource "hello_aeroplane" "test" {
 
 After this is deployed, the value "ABC123" is stored into state.
 
-Subsequent deployment with registration code "abc123" might be required (for example: replacing hardcoded value with data source that always returns lower case). This will result in catastrophic destroy and re-create.
+Subsequent deployment with registration code "abc123" might be required (for example: replacing hardcoded value with data source that always returns lower case). This will result in a plan diff that forces a catastrophic destroy and re-create.
 
-If implementing new resource, the proper solution is to normalize the value in the read function before setting into state. In the example below the "normal" value is all lowercase:
+Value should be normalized in the read function before setting into state. In the example below the "normal" value is all lowercase:
 
 ```go
 func resourceAeroplaneRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
@@ -53,9 +53,7 @@ func resourceAeroplaneRead(ctx context.Context, d *schema.ResourceData, meta any
 }
 ```
 
-But this cannot be done when fixing bug against an existing resource. Any config that use different casing than normal will see a confusing plan diff after updating the provider version.
-
-Instead we have to implement a `DiffSuppressFunc` that ignores case differences:
+But this alone is not sufficient, Terraform compares config value against state when calculating subsequent plan diff. A config "ABC123" will still result in a diff when compared to state value "abc123" although semantically they're the same. To overcome this, we also have to implement a `DiffSuppressFunc` that ignores case differences:
 
 ```go
 "registration_code": {
