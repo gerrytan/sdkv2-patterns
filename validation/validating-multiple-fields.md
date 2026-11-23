@@ -11,16 +11,16 @@ Use a `CustomizeDiff` function to validate multiple fields together. In the exam
 
 ```go
 "sku": {
-	Type:         schema.TypeString,
-	Required:     true,
-	Description:  "The SKU of the hot air balloon. Must be standard or premium.",
-	ValidateFunc: validation.StringInSlice([]string{"standard", "premium"}, false),
+  Type:         schema.TypeString,
+  Required:     true,
+  Description:  "The SKU of the hot air balloon. Must be standard or premium.",
+  ValidateFunc: validation.StringInSlice([]string{"standard", "premium"}, false),
 },
 "additional_gas_tank": {
-	Type:         schema.TypeInt,
-	Optional:     true,
-	Description:  "Additional gas tanks, from 1 to 10. Only available with the premium SKU.",
-	ValidateFunc: validation.IntBetween(1, 10),
+  Type:         schema.TypeInt,
+  Optional:     true,
+  Description:  "Additional gas tanks, from 1 to 10. Only available with the premium SKU.",
+  ValidateFunc: validation.IntBetween(1, 10),
 },
 ```
 
@@ -32,24 +32,24 @@ Following is an example on how to use a `CustomizeDiff` function to validate mul
 
 ```go
 func resourceHotAirBalloonAdditionalGasTankSkuCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ any) error {
-	sku, tanks := "", 0
+  sku, tanks := "", 0
 
-	if val, ok := d.GetOkExists("sku"); ok {
-		sku = val.(string)
-	} else {
-		return nil
-	}
+  if val, ok := d.GetOkExists("sku"); ok {
+    sku = val.(string)
+  } else {
+    return nil
+  }
 
-	if val, ok := d.GetOkExists("additional_gas_tank"); ok {
-		tanks = val.(int)
-	} else {
-		return nil
-	}
+  if val, ok := d.GetOkExists("additional_gas_tank"); ok {
+    tanks = val.(int)
+  } else {
+    return nil
+  }
 
-	if sku != "premium" && tanks > 0 {
-		return fmt.Errorf("additional_gas_tank can only be set when sku is premium")
-	}
-	return nil
+  if sku != "premium" && tanks > 0 {
+    return fmt.Errorf("additional_gas_tank can only be set when sku is premium")
+  }
+  return nil
 }
 ```
 

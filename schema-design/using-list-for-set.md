@@ -11,24 +11,24 @@ Sometimes representing set / map collection as list in Terraform is preferrable 
 
 ```go
 "plugins": {
-	Type:        schema.TypeList,
-	Optional:    true,
-	MinItems:    1,
-	Description: "Plugins for the paper plane, API does not preserve order and always returns them sorted by ID.",
-	Elem: &schema.Resource{
-		Schema: map[string]*schema.Schema{
-			"id": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "The identifier of the plugin.",
-			},
-			"description": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "The description of the plugin.",
-			},
-		},
-	},
+  Type:        schema.TypeList,
+  Optional:    true,
+  MinItems:    1,
+  Description: "Plugins for the paper plane, API does not preserve order and always returns them sorted by ID.",
+  Elem: &schema.Resource{
+    Schema: map[string]*schema.Schema{
+      "id": {
+        Type:        schema.TypeString,
+        Required:    true,
+        Description: "The identifier of the plugin.",
+      },
+      "description": {
+        Type:        schema.TypeString,
+        Required:    true,
+        Description: "The description of the plugin.",
+      },
+    },
+  },
 },
 ```
 
@@ -42,30 +42,30 @@ If appropriate, implement a CustomizedDiff uniqueness validator at plan time[^1]
 
 ```go
 func resourcePaperPlanePluginsCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ any) error {
-	config := d.GetRawConfig()
-	if config.IsNull() || !config.IsKnown() {
-		return nil
-	}
-	plugins := config.GetAttr("plugins")
-	if plugins.IsNull() || !plugins.IsKnown() {
-		return nil
-	}
-	seen := make(map[string]bool)
-	for iterator := plugins.ElementIterator(); iterator.Next(); {
-		_, plugin := iterator.Element()
-		if plugin.IsNull() || !plugin.IsKnown() {
-			continue
-		}
-		id := plugin.GetAttr("id")
-		if id.IsNull() || !id.IsKnown() {
-			continue
-		}
-		if seen[id.AsString()] {
-			return fmt.Errorf("plugins contains duplicate id %q", id.AsString())
-		}
-		seen[id.AsString()] = true
-	}
-	return nil
+  config := d.GetRawConfig()
+  if config.IsNull() || !config.IsKnown() {
+    return nil
+  }
+  plugins := config.GetAttr("plugins")
+  if plugins.IsNull() || !plugins.IsKnown() {
+    return nil
+  }
+  seen := make(map[string]bool)
+  for iterator := plugins.ElementIterator(); iterator.Next(); {
+    _, plugin := iterator.Element()
+    if plugin.IsNull() || !plugin.IsKnown() {
+      continue
+    }
+    id := plugin.GetAttr("id")
+    if id.IsNull() || !id.IsKnown() {
+      continue
+    }
+    if seen[id.AsString()] {
+      return fmt.Errorf("plugins contains duplicate id %q", id.AsString())
+    }
+    seen[id.AsString()] = true
+  }
+  return nil
 }
 ```
 
@@ -103,29 +103,29 @@ Implement a `DiffSuppressFunc` to ignore ordering differences.
 
 ```go
 func resourcePaperPlanePluginsV2DiffSuppress(_ string, _ string, _ string, d *schema.ResourceData) bool {
-	oldValue, newValue := d.GetChange("plugins_v2")
-	oldPlugins, newPlugins := oldValue.([]any), newValue.([]any)
-	if len(oldPlugins) != len(newPlugins) {
-		return false
-	}
-	type plugin struct {
-		id          string
-		description string
-	}
-	counts := make(map[plugin]int)
-	for _, value := range oldPlugins {
-		entry := value.(map[string]any)
-		counts[plugin{entry["id"].(string), entry["description"].(string)}]++
-	}
-	for _, value := range newPlugins {
-		entry := value.(map[string]any)
-		key := plugin{entry["id"].(string), entry["description"].(string)}
-		if counts[key] == 0 {
-			return false
-		}
-		counts[key]--
-	}
-	return true
+  oldValue, newValue := d.GetChange("plugins_v2")
+  oldPlugins, newPlugins := oldValue.([]any), newValue.([]any)
+  if len(oldPlugins) != len(newPlugins) {
+    return false
+  }
+  type plugin struct {
+    id          string
+    description string
+  }
+  counts := make(map[plugin]int)
+  for _, value := range oldPlugins {
+    entry := value.(map[string]any)
+    counts[plugin{entry["id"].(string), entry["description"].(string)}]++
+  }
+  for _, value := range newPlugins {
+    entry := value.(map[string]any)
+    key := plugin{entry["id"].(string), entry["description"].(string)}
+    if counts[key] == 0 {
+      return false
+    }
+    counts[key]--
+  }
+  return true
 }
 ```
 

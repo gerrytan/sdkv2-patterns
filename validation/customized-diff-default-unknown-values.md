@@ -23,10 +23,10 @@ The schema for `sku` is a string with default value `"standard"`
 
 ```go
 "sku": {
-	Type:         schema.TypeString,
-	Optional:     true,
-	Default:      "standard",
-	Description:  "The SKU of the kite. Defaults to standard.",
+  Type:         schema.TypeString,
+  Optional:     true,
+  Default:      "standard",
+  Description:  "The SKU of the kite. Defaults to standard.",
 },
 ```
 
@@ -34,11 +34,11 @@ The schema for `sku` is a string with default value `"standard"`
 
 ```go
 func resourceKiteCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ any) error {
-	sku := d.Get("sku").(string)
-	if sku == "" {
-		return nil
-	}
-	// further logic here...
+  sku := d.Get("sku").(string)
+  if sku == "" {
+    return nil
+  }
+  // further logic here...
 }
 ```
 
@@ -46,14 +46,14 @@ func resourceKiteCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ any)
 
 ```go
 func resourceKiteCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ any) error {
-	if sku, ok := d.GetOk("sku"); ok {
-		// "sku" is a non-zero value
-	} else {
+  if sku, ok := d.GetOk("sku"); ok {
+    // "sku" is a non-zero value
+  } else {
     // sku is a zero value, either unknown or explicitly set to ""
-		return nil
-	}
+    return nil
+  }
 
-	// further logic here...
+  // further logic here...
 }
 ```
 
@@ -70,14 +70,14 @@ resource "hello_kite" "test" {
 
 ```go
 func resourceKiteCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ any) error {
-	if sku, ok := d.GetOkExists("sku"); ok {
-		// "sku" is a known value, which could be a zero value for the type (eg: "" for string)
-	} else {
+  if sku, ok := d.GetOkExists("sku"); ok {
+    // "sku" is a known value, which could be a zero value for the type (eg: "" for string)
+  } else {
     // sku is unknown value
-		return nil
-	}
+    return nil
+  }
 
-	// further logic here...
+  // further logic here...
 }
 ```
 

@@ -1,23 +1,23 @@
 package provider
 
 import (
-	_ "embed"
-	"fmt"
-	"os"
-	"regexp"
-	"strings"
-	"testing"
+  _ "embed"
+  "fmt"
+  "os"
+  "regexp"
+  "strings"
+  "testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+  "github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 var testAccProviderFactories = map[string]func() (*schema.Provider, error){
-	"hello": func() (*schema.Provider, error) { return New(), nil },
+  "hello": func() (*schema.Provider, error) { return New(), nil },
 }
 
 func testAccBalloonConfig(sku, tanks string) string {
-	return fmt.Sprintf(`
+  return fmt.Sprintf(`
 resource "hello_hot_air_balloon" "test" {
   name = "test-balloon"
   sku  = %q
@@ -30,40 +30,40 @@ resource "hello_hot_air_balloon" "test" {
 var testAccHotAirBalloonSetDupConfig string
 
 func TestAccHotAirBalloonExteriorColourDuplicates(t *testing.T) {
-	resource.Test(t, resource.TestCase{
-		ProviderFactories: testAccProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccHotAirBalloonSetDupConfig,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("hello_hot_air_balloon.test", "exterior_colour.#", "2"),
-					resource.TestCheckTypeSetElemAttr("hello_hot_air_balloon.test", "exterior_colour.*", "red"),
-					resource.TestCheckTypeSetElemAttr("hello_hot_air_balloon.test", "exterior_colour.*", "blue"),
-				),
-			},
-			{
-				Config: strings.ReplaceAll(
-					testAccHotAirBalloonSetDupConfig, `["red", "blue", "red"]`, `["blue", "red"]`,
-				),
-				PlanOnly:           true,
-				ExpectNonEmptyPlan: false,
-			},
-		},
-	})
+  resource.Test(t, resource.TestCase{
+    ProviderFactories: testAccProviderFactories,
+    Steps: []resource.TestStep{
+      {
+        Config: testAccHotAirBalloonSetDupConfig,
+        Check: resource.ComposeTestCheckFunc(
+          resource.TestCheckResourceAttr("hello_hot_air_balloon.test", "exterior_colour.#", "2"),
+          resource.TestCheckTypeSetElemAttr("hello_hot_air_balloon.test", "exterior_colour.*", "red"),
+          resource.TestCheckTypeSetElemAttr("hello_hot_air_balloon.test", "exterior_colour.*", "blue"),
+        ),
+      },
+      {
+        Config: strings.ReplaceAll(
+          testAccHotAirBalloonSetDupConfig, `["red", "blue", "red"]`, `["blue", "red"]`,
+        ),
+        PlanOnly:           true,
+        ExpectNonEmptyPlan: false,
+      },
+    },
+  })
 }
 
 //go:embed testdata/resource_hot_air_balloon_test_set_index.tf
 var testAccHotAirBalloonSetIndexConfig string
 
 func TestAccHotAirBalloonExteriorColourIndexInvalid(t *testing.T) {
-	resource.Test(t, resource.TestCase{
-		ProviderFactories: testAccProviderFactories,
-		Steps: []resource.TestStep{{
-			Config:      testAccHotAirBalloonSetIndexConfig,
-			PlanOnly:    true,
-			ExpectError: regexp.MustCompile("Elements of a set are identified only by their value"),
-		}},
-	})
+  resource.Test(t, resource.TestCase{
+    ProviderFactories: testAccProviderFactories,
+    Steps: []resource.TestStep{{
+      Config:      testAccHotAirBalloonSetIndexConfig,
+      PlanOnly:    true,
+      ExpectError: regexp.MustCompile("Elements of a set are identified only by their value"),
+    }},
+  })
 }
 
 //go:embed testdata/resource_hot_air_balloon_test_modification_dup.tf
@@ -73,139 +73,139 @@ var testAccHotAirBalloonModificationDupConfig string
 var testAccHotAirBalloonModificationV2DupConfig string
 
 func TestAccHotAirBalloonModificationV2DuplicatesInvalid(t *testing.T) {
-	resource.Test(t, resource.TestCase{
-		ProviderFactories: testAccProviderFactories,
-		Steps: []resource.TestStep{{
-			Config:      testAccHotAirBalloonModificationV2DupConfig,
-			PlanOnly:    true,
-			ExpectError: regexp.MustCompile(`modification_v2 contains duplicate id "satNav"`),
-		}},
-	})
+  resource.Test(t, resource.TestCase{
+    ProviderFactories: testAccProviderFactories,
+    Steps: []resource.TestStep{{
+      Config:      testAccHotAirBalloonModificationV2DupConfig,
+      PlanOnly:    true,
+      ExpectError: regexp.MustCompile(`modification_v2 contains duplicate id "satNav"`),
+    }},
+  })
 }
 
 func TestAccHotAirBalloonModificationDuplicates(t *testing.T) {
-	resource.Test(t, resource.TestCase{
-		ProviderFactories: testAccProviderFactories,
-		Steps: []resource.TestStep{{
-			Config: testAccHotAirBalloonModificationDupConfig,
-			Check: resource.ComposeTestCheckFunc(
-				resource.TestCheckResourceAttr("hello_hot_air_balloon.test", "modification.#", "1"),
-				resource.TestCheckTypeSetElemNestedAttrs("hello_hot_air_balloon.test", "modification.*", map[string]string{
-					"id":          "satNav",
-					"description": "yet another sat nav modification, mistakenly added",
-				}),
-			),
-		}},
-	})
+  resource.Test(t, resource.TestCase{
+    ProviderFactories: testAccProviderFactories,
+    Steps: []resource.TestStep{{
+      Config: testAccHotAirBalloonModificationDupConfig,
+      Check: resource.ComposeTestCheckFunc(
+        resource.TestCheckResourceAttr("hello_hot_air_balloon.test", "modification.#", "1"),
+        resource.TestCheckTypeSetElemNestedAttrs("hello_hot_air_balloon.test", "modification.*", map[string]string{
+          "id":          "satNav",
+          "description": "yet another sat nav modification, mistakenly added",
+        }),
+      ),
+    }},
+  })
 }
 
 func TestAccHotAirBalloonAdditionalGasTank(t *testing.T) {
-	for _, test := range []struct {
-		name  string
-		sku   string
-		tanks string
-	}{
-		{name: "standard", sku: "standard"},
-		{name: "premium", sku: "premium", tanks: "additional_gas_tank = 1"},
-	} {
-		t.Run(test.name, func(t *testing.T) {
-			resource.Test(t, resource.TestCase{
-				ProviderFactories: testAccProviderFactories,
-				Steps: []resource.TestStep{{
-					Config: testAccBalloonConfig(test.sku, test.tanks),
-					Check: resource.ComposeTestCheckFunc(
-						resource.TestCheckResourceAttr("hello_hot_air_balloon.test", "name", "test-balloon"),
-						resource.TestCheckResourceAttr("hello_hot_air_balloon.test", "sku", test.sku),
-					),
-				}},
-			})
-		})
-	}
+  for _, test := range []struct {
+    name  string
+    sku   string
+    tanks string
+  }{
+    {name: "standard", sku: "standard"},
+    {name: "premium", sku: "premium", tanks: "additional_gas_tank = 1"},
+  } {
+    t.Run(test.name, func(t *testing.T) {
+      resource.Test(t, resource.TestCase{
+        ProviderFactories: testAccProviderFactories,
+        Steps: []resource.TestStep{{
+          Config: testAccBalloonConfig(test.sku, test.tanks),
+          Check: resource.ComposeTestCheckFunc(
+            resource.TestCheckResourceAttr("hello_hot_air_balloon.test", "name", "test-balloon"),
+            resource.TestCheckResourceAttr("hello_hot_air_balloon.test", "sku", test.sku),
+          ),
+        }},
+      })
+    })
+  }
 }
 
 func TestAccHotAirBalloonAdditionalGasTankInvalid(t *testing.T) {
-	for _, test := range []struct {
-		name  string
-		sku   string
-		tanks int
-		error string
-	}{
-		{name: "standard_with_tanks", sku: "standard", tanks: 1, error: "additional_gas_tank can only be set when sku is premium"},
-		{name: "below_minimum", sku: "premium", tanks: 0, error: "expected additional_gas_tank to be in the range"},
-		{name: "negative", sku: "premium", tanks: -1, error: "expected additional_gas_tank to be in the range"},
-		{name: "above_maximum", sku: "premium", tanks: 11, error: "expected additional_gas_tank to be in the range"},
-	} {
-		t.Run(test.name, func(t *testing.T) {
-			resource.Test(t, resource.TestCase{
-				ProviderFactories: testAccProviderFactories,
-				Steps: []resource.TestStep{{
-					Config:      testAccBalloonConfig(test.sku, fmt.Sprintf("additional_gas_tank = %d", test.tanks)),
-					PlanOnly:    true,
-					ExpectError: regexp.MustCompile(test.error),
-				}},
-			})
-		})
-	}
+  for _, test := range []struct {
+    name  string
+    sku   string
+    tanks int
+    error string
+  }{
+    {name: "standard_with_tanks", sku: "standard", tanks: 1, error: "additional_gas_tank can only be set when sku is premium"},
+    {name: "below_minimum", sku: "premium", tanks: 0, error: "expected additional_gas_tank to be in the range"},
+    {name: "negative", sku: "premium", tanks: -1, error: "expected additional_gas_tank to be in the range"},
+    {name: "above_maximum", sku: "premium", tanks: 11, error: "expected additional_gas_tank to be in the range"},
+  } {
+    t.Run(test.name, func(t *testing.T) {
+      resource.Test(t, resource.TestCase{
+        ProviderFactories: testAccProviderFactories,
+        Steps: []resource.TestStep{{
+          Config:      testAccBalloonConfig(test.sku, fmt.Sprintf("additional_gas_tank = %d", test.tanks)),
+          PlanOnly:    true,
+          ExpectError: regexp.MustCompile(test.error),
+        }},
+      })
+    })
+  }
 }
 
 //go:embed testdata/resource_hot_air_balloon_test_value_unknown.tf
 var testAccHotAirBalloonValueUnknownConfig string
 
 func TestAccHotAirBalloonInvalidAdditionalGasTankAllowedIfValueIsUnknown(t *testing.T) {
-	resource.Test(t, resource.TestCase{
-		ProviderFactories: testAccProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config:             testAccHotAirBalloonValueUnknownConfig,
-				PlanOnly:           true,
-				ExpectNonEmptyPlan: true,
-			},
-			{
-				Config:      testAccHotAirBalloonValueUnknownConfig,
-				ExpectError: regexp.MustCompile("additional_gas_tank can only be set when sku is premium"),
-			},
-		},
-	})
+  resource.Test(t, resource.TestCase{
+    ProviderFactories: testAccProviderFactories,
+    Steps: []resource.TestStep{
+      {
+        Config:             testAccHotAirBalloonValueUnknownConfig,
+        PlanOnly:           true,
+        ExpectNonEmptyPlan: true,
+      },
+      {
+        Config:      testAccHotAirBalloonValueUnknownConfig,
+        ExpectError: regexp.MustCompile("additional_gas_tank can only be set when sku is premium"),
+      },
+    },
+  })
 }
 
 func TestAccHotAirBalloonImportStateVerify(t *testing.T) {
-	if os.Getenv("TEST_ACC_IMPORT_STATE_VERIFY") != "true" {
-		// The failure caused by ImportStateVerify cannot be asserted using ExpectError, skip this test instead
-		t.Skip("set TEST_ACC_IMPORT_STATE_VERIFY=true to run this test")
-	}
-	// ref-start: test-assertions-import-state-verify
-	resource.Test(t, resource.TestCase{
-		ProviderFactories: testAccProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				// An intentional bug was introduced where the colour "rainbow" is dropped from the API payload
-				Config: `
+  if os.Getenv("TEST_ACC_IMPORT_STATE_VERIFY") != "true" {
+    // The failure caused by ImportStateVerify cannot be asserted using ExpectError, skip this test instead
+    t.Skip("set TEST_ACC_IMPORT_STATE_VERIFY=true to run this test")
+  }
+  // ref-start: test-assertions-import-state-verify
+  resource.Test(t, resource.TestCase{
+    ProviderFactories: testAccProviderFactories,
+    Steps: []resource.TestStep{
+      {
+        // An intentional bug was introduced where the colour "rainbow" is dropped from the API payload
+        Config: `
 resource "hello_hot_air_balloon" "test" {
   name            = "test-balloon"
   sku             = "standard"
   exterior_colour = ["rainbow"]
 }
 `,
-				// Setting this to false would have detected the problem, but intentionally set to true to test ImportStateVerify
-				ExpectNonEmptyPlan: true,
-			},
-			{
-				ResourceName:      "hello_hot_air_balloon.test",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
+        // Setting this to false would have detected the problem, but intentionally set to true to test ImportStateVerify
+        ExpectNonEmptyPlan: true,
+      },
+      {
+        ResourceName:      "hello_hot_air_balloon.test",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+    },
+  })
 }
 
 // ref-end: test-assertions-import-state-verify
 
 func TestAccHotAirBalloonModificationDescriptionUpdate(t *testing.T) {
-	resource.Test(t, resource.TestCase{
-		ProviderFactories: testAccProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: `
+  resource.Test(t, resource.TestCase{
+    ProviderFactories: testAccProviderFactories,
+    Steps: []resource.TestStep{
+      {
+        Config: `
 resource "hello_hot_air_balloon" "test" {
   name = "test-balloon"
   sku  = "standard"
@@ -216,13 +216,13 @@ resource "hello_hot_air_balloon" "test" {
   }
 }
 `,
-				Check: resource.TestCheckTypeSetElemNestedAttrs("hello_hot_air_balloon.test", "modification.*", map[string]string{
-					"id":          "satNav",
-					"description": "satellite navigation",
-				}),
-			},
-			{
-				Config: `
+        Check: resource.TestCheckTypeSetElemNestedAttrs("hello_hot_air_balloon.test", "modification.*", map[string]string{
+          "id":          "satNav",
+          "description": "satellite navigation",
+        }),
+      },
+      {
+        Config: `
 resource "hello_hot_air_balloon" "test" {
   name = "test-balloon"
   sku  = "standard"
@@ -233,9 +233,9 @@ resource "hello_hot_air_balloon" "test" {
   }
 }
 `,
-				PlanOnly:           true,
-				ExpectNonEmptyPlan: false,
-			},
-		},
-	})
+        PlanOnly:           true,
+        ExpectNonEmptyPlan: false,
+      },
+    },
+  })
 }

@@ -11,25 +11,25 @@ Given a list of blocks with `ForceNew: true` specified at the top, but not in ne
 
 ```go
 "stickers": {
-	Type:        schema.TypeList,
-	Optional:    true,
-	MinItems:    1,
-	Description: "Stickers for the paper plane.",
-	ForceNew:    true,
-	Elem: &schema.Resource{
-		Schema: map[string]*schema.Schema{
-			"id": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "The identifier of the sticker.",
-			},
-			"description": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "The description of the sticker.",
-			},
-		},
-	},
+  Type:        schema.TypeList,
+  Optional:    true,
+  MinItems:    1,
+  Description: "Stickers for the paper plane.",
+  ForceNew:    true,
+  Elem: &schema.Resource{
+    Schema: map[string]*schema.Schema{
+      "id": {
+        Type:        schema.TypeString,
+        Required:    true,
+        Description: "The identifier of the sticker.",
+      },
+      "description": {
+        Type:        schema.TypeString,
+        Required:    true,
+        Description: "The description of the sticker.",
+      },
+    },
+  },
 },
 ```
 

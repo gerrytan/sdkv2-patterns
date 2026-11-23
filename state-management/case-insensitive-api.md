@@ -11,18 +11,18 @@ Some API behave in case-insensitive way. In the "aeroplane" resource below, the 
 
 ```go
 Schema: map[string]*schema.Schema{
-	"name": {
-		Type:        schema.TypeString,
-		Required:    true,
-		ForceNew:    true,
-		Description: "The name of the aeroplane.",
-	},
-	"registration_code": {
-		Type:        schema.TypeString,
-		Required:    true,
-		ForceNew:    true,
-		Description: "The registration code of the aeroplane.",
-	},
+  "name": {
+    Type:        schema.TypeString,
+    Required:    true,
+    ForceNew:    true,
+    Description: "The name of the aeroplane.",
+  },
+  "registration_code": {
+    Type:        schema.TypeString,
+    Required:    true,
+    ForceNew:    true,
+    Description: "The registration code of the aeroplane.",
+  },
 ```
 
 <!-- ref-end -->

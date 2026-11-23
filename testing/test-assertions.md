@@ -16,28 +16,28 @@ If it doesn't (for example the step expects nonempty plan), an `ImportStateVerif
 <!-- ref-start ref="internal/reference-provider/provider/resource_hot_air_balloon_test.go#test-assertions-import-state-verify" lang="go" -->
 
 ```go
-	resource.Test(t, resource.TestCase{
-		ProviderFactories: testAccProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				// An intentional bug was introduced where the colour "rainbow" is dropped from the API payload
-				Config: `
+  resource.Test(t, resource.TestCase{
+    ProviderFactories: testAccProviderFactories,
+    Steps: []resource.TestStep{
+      {
+        // An intentional bug was introduced where the colour "rainbow" is dropped from the API payload
+        Config: `
 resource "hello_hot_air_balloon" "test" {
   name            = "test-balloon"
   sku             = "standard"
   exterior_colour = ["rainbow"]
 }
 `,
-				// Setting this to false would have detected the problem, but intentionally set to true to test ImportStateVerify
-				ExpectNonEmptyPlan: true,
-			},
-			{
-				ResourceName:      "hello_hot_air_balloon.test",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
+        // Setting this to false would have detected the problem, but intentionally set to true to test ImportStateVerify
+        ExpectNonEmptyPlan: true,
+      },
+      {
+        ResourceName:      "hello_hot_air_balloon.test",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+    },
+  })
 }
 ```
 

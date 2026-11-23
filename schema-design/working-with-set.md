@@ -11,10 +11,10 @@ Set implicitly enforces uniqueness. Duplicate values can still be specified, but
 
 ```go
 "exterior_colour": {
-	Type:        schema.TypeSet,
-	Optional:    true,
-	Description: "The exterior colours of the hot air balloon.",
-	Elem:        &schema.Schema{Type: schema.TypeString},
+  Type:        schema.TypeSet,
+  Optional:    true,
+  Description: "The exterior colours of the hot air balloon.",
+  Elem:        &schema.Schema{Type: schema.TypeString},
 },
 ```
 
@@ -67,26 +67,26 @@ The situation gets more confusing with a complex set with a custom hash. Conside
 
 ```go
 "modification": {
-	Type:        schema.TypeSet,
-	Optional:    true,
-	Description: "Modifications to the hot air balloon, identified by id.",
-	Set: func(value any) int {
-		return schema.HashString(value.(map[string]any)["id"])
-	},
-	Elem: &schema.Resource{
-		Schema: map[string]*schema.Schema{
-			"id": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "The identifier of the modification.",
-			},
-			"description": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "The description of the modification.",
-			},
-		},
-	},
+  Type:        schema.TypeSet,
+  Optional:    true,
+  Description: "Modifications to the hot air balloon, identified by id.",
+  Set: func(value any) int {
+    return schema.HashString(value.(map[string]any)["id"])
+  },
+  Elem: &schema.Resource{
+    Schema: map[string]*schema.Schema{
+      "id": {
+        Type:        schema.TypeString,
+        Required:    true,
+        Description: "The identifier of the modification.",
+      },
+      "description": {
+        Type:        schema.TypeString,
+        Required:    true,
+        Description: "The description of the modification.",
+      },
+    },
+  },
 },
 ```
 
@@ -151,30 +151,30 @@ Example of guarding against duplicate `id` at plan time:
 
 ```go
 func resourceHotAirBalloonModificationV2CustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ any) error {
-	config := d.GetRawConfig()
-	if config.IsNull() || !config.IsKnown() {
-		return nil
-	}
-	modifications := config.GetAttr("modification_v2")
-	if modifications.IsNull() || !modifications.IsKnown() {
-		return nil
-	}
-	seen := make(map[string]bool)
-	for iterator := modifications.ElementIterator(); iterator.Next(); {
-		_, modification := iterator.Element()
-		if modification.IsNull() || !modification.IsKnown() {
-			continue
-		}
-		id := modification.GetAttr("id")
-		if id.IsNull() || !id.IsKnown() {
-			continue
-		}
-		if seen[id.AsString()] {
-			return fmt.Errorf("modification_v2 contains duplicate id %q", id.AsString())
-		}
-		seen[id.AsString()] = true
-	}
-	return nil
+  config := d.GetRawConfig()
+  if config.IsNull() || !config.IsKnown() {
+    return nil
+  }
+  modifications := config.GetAttr("modification_v2")
+  if modifications.IsNull() || !modifications.IsKnown() {
+    return nil
+  }
+  seen := make(map[string]bool)
+  for iterator := modifications.ElementIterator(); iterator.Next(); {
+    _, modification := iterator.Element()
+    if modification.IsNull() || !modification.IsKnown() {
+      continue
+    }
+    id := modification.GetAttr("id")
+    if id.IsNull() || !id.IsKnown() {
+      continue
+    }
+    if seen[id.AsString()] {
+      return fmt.Errorf("modification_v2 contains duplicate id %q", id.AsString())
+    }
+    seen[id.AsString()] = true
+  }
+  return nil
 }
 ```
 
