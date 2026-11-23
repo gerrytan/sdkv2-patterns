@@ -22,6 +22,7 @@ func New() *schema.Provider {
 		ResourcesMap: map[string]*schema.Resource{
 			"hello_aeroplane":       resourceAeroplane(),
 			"hello_hot_air_balloon": resourceHotAirBalloon(),
+			"hello_kite":            resourceKite(),
 			"hello_paper_plane":     resourcePaperPlane(),
 		},
 	}

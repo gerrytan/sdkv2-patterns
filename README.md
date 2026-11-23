@@ -21,5 +21,6 @@ Collection of common patterns, unexpected / quirky behaviours and best practices
 
 ## Validation
 
+- [Default and unknown values in CustomizeDiff](validation/customized-diff-default-unknown-values.md)
 - [Validating multiple fields](validation/validating-multiple-fields.md)
 <!-- end-toc -->

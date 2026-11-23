@@ -108,19 +108,21 @@ func resourceHotAirBalloon() *schema.Resource {
 
 // ref-start: validating-multi-fields-customdiff
 func resourceHotAirBalloonAdditionalGasTankSkuCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ any) error {
-	config := d.GetRawConfig()
-	if config.IsNull() || !config.IsKnown() {
+	sku, tanks := "", 0
+
+	if val, ok := d.GetOkExists("sku"); ok {
+		sku = val.(string)
+	} else {
 		return nil
 	}
-	tanks := config.GetAttr("additional_gas_tank")
-	if tanks.IsNull() || !tanks.IsKnown() {
+
+	if val, ok := d.GetOkExists("additional_gas_tank"); ok {
+		tanks = val.(int)
+	} else {
 		return nil
 	}
-	sku := config.GetAttr("sku")
-	if sku.IsNull() || !sku.IsKnown() {
-		return nil
-	}
-	if sku.AsString() != "premium" {
+
+	if sku != "premium" && tanks > 0 {
 		return fmt.Errorf("additional_gas_tank can only be set when sku is premium")
 	}
 	return nil

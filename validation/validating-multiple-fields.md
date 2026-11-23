@@ -32,19 +32,21 @@ Following is an example on how to use a `CustomizeDiff` function to validate mul
 
 ```go
 func resourceHotAirBalloonAdditionalGasTankSkuCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ any) error {
-	config := d.GetRawConfig()
-	if config.IsNull() || !config.IsKnown() {
+	sku, tanks := "", 0
+
+	if val, ok := d.GetOkExists("sku"); ok {
+		sku = val.(string)
+	} else {
 		return nil
 	}
-	tanks := config.GetAttr("additional_gas_tank")
-	if tanks.IsNull() || !tanks.IsKnown() {
+
+	if val, ok := d.GetOkExists("additional_gas_tank"); ok {
+		tanks = val.(int)
+	} else {
 		return nil
 	}
-	sku := config.GetAttr("sku")
-	if sku.IsNull() || !sku.IsKnown() {
-		return nil
-	}
-	if sku.AsString() != "premium" {
+
+	if sku != "premium" && tanks > 0 {
 		return fmt.Errorf("additional_gas_tank can only be set when sku is premium")
 	}
 	return nil
@@ -53,26 +55,6 @@ func resourceHotAirBalloonAdditionalGasTankSkuCustomizeDiff(_ context.Context, d
 
 <!-- ref-end -->
 
-Observe how `IsKnown` value check is performed on each fields, and the validator opts out by returning nil early if the value is unknown. Sometimes values are not known during plan time and the validation logic cannot be done yet until apply time.
-
-In the below example, `hello_hot_air_balloon.test` is invalid because the `sku` is `standard`, but the value is not known during plan time. The resource will pass validation during plan time, but the `can only be set when sku is premium` validation error will occur during apply time[^2].
-
-<!-- ref-start file="internal/reference-provider/provider/testdata/resource_hot_air_balloon_test_value_unknown.tf" lang="terraform" -->
-
-```terraform
-resource "hello_paper_plane" "test" {
-  name = "test-paper-plane"
-  # Remote API set sku to "standard" if not specified
-}
-
-resource "hello_hot_air_balloon" "test" {
-  name                = "test-balloon"
-  sku                 = hello_paper_plane.test.sku
-  additional_gas_tank = 5
-}
-```
-
-<!-- ref-end -->
+`GetOkExists` will check whether value is known in CustomizeDiff as well as having the default value applied. See [customized-diff-default-unknown-values.md](customized-diff-default-unknown-values.md) for more info.
 
 [^1]: Refer to [`TestAccHotAirBalloonAdditionalGasTankInvalid`](../internal/reference-provider/provider/resource_hot_air_balloon_test.go).
-[^2]: Refer to [`TestAccHotAirBalloonInvalidAdditionalGasTankAllowedIfValueIsUnknown`](../internal/reference-provider/provider/resource_hot_air_balloon_test.go).
